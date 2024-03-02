@@ -1,11 +1,11 @@
 import React from 'react';
 import './Course.css';
-import ListCard from '../../Components/Course/ListCard';
+import { Outlet } from 'react-router-dom';
 function Course() {
-    console.log("Đây là trang tin tức");
+    
     return (
         <div>
-            <ListCard></ListCard>
+            <Outlet/>
         </div>
     );
 }

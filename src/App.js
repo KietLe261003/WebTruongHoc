@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { useContext} from 'react';
+import { Routes, Route, Navigate} from 'react-router-dom';
 
 import './App.css';
 import Layout from './Components/Layout/Layout/Layout';
@@ -11,20 +11,94 @@ import Group from './Page/Group/Index.js';
 import Class from './Page/Class/Index.js';
 import Blog from './Page/Blog/Index.js';
 import Profile from './Page/Profile/Index.js';
+import Register from './Page/Login/Register.js';
+import Admin from './Admin/Page/Index.js';
+import ManagerUser from './Admin/Page/ManagerUser.js';
+import ManagerCourse from './Admin/Page/ManagerCourse/ManagerCourse.js';
+import NotFound from './Page/NotFound.js';
+import {AuthContext} from './context/AuthContext.js';
+import DetailCourse from './Admin/Page/ManagerCourse/DetailCourse.js';
+import DashBoard from './Admin/Page/ManagerCourse/DashBoard.js';
+import Learing from './Components/Learing/Learing.js';
+import ListCourse from './Page/Course/ListCourse.js';
+import DetailCourseUser from './Page/Course/DetailCourse.js';
+import CompleCourse from './Page/Course/CompleCourse.js';
+import ManagerCertificate from './Admin/Page/ManagerCertificate/ManagerCertificate.js';
+import Certificate from './Admin/Page/ManagerCertificate/Certificate.js';
+import DetailCertificate from './Admin/Page/ManagerCertificate/DetailCertificate.js';
 function App() {
+  const {currentUser} = useContext(AuthContext);
+  const ProtectedRoute = ({children}) => {
+    if(!currentUser)
+    {
+      return <Navigate to="/Login"/>
+    }
+    return children;
+  }
+  // async function getUser() {
+  //   const docSnap = await getDoc(doc(db,"users",currentUser.uid));
+  //   if(docSnap.exists())
+  //   setUserInfor(docSnap.data());
+  //   else
+  //   console.log("Not found user");
+  // }
+  // const ProtectedRouteAdmin = ({children}) => {
+  //   if(!currentUser)
+  //   {
+  //     return <Navigate to="/Login"/>
+  //   }
+  //   if(userInfor===null)
+  //   {
+  //     getUser();
+  //   }
+  //   else
+  //   {
+  //       if(userInfor.role==="admin")
+  //       return children;
+  //       else
+  //       return <Navigate to="/Login"/>
+  //   }
+  // }
   return (
     <div className="App">
         <Routes>
-            <Route path='/' element={<Layout/>}>
-              <Route path='/Home' element={<Home/>}/>
-              <Route path='/CourseOutline' element={<CourseOutline/>}/>
-              <Route path='/Course' element={<Course/>}/>
-              <Route path='/Group' element={<Group/>}/>
-              <Route path='/Class' element={<Class/>}/>
-              <Route path='/Blog' element={<Blog/>}/>
-              <Route path='/Profile' element={<Profile/>}/>
+            <Route path='/*' element={<ProtectedRoute><Layout/></ProtectedRoute>}>
+              <Route index element={<Home/>}/>
+              <Route path='CourseOutline' element={<CourseOutline/>}/>
+              <Route path='Course' element={<Course/>}>
+                  <Route index element={<ListCourse/>}/>
+                  <Route path='Detail/:id' element={<DetailCourseUser/>}/>
+                  <Route path='CompleCourse/:idCourse' element={<CompleCourse/>}/>
+              </Route>
+              <Route path='Group' element={<Group/>}/>
+              <Route path='Class' element={<Class/>}/>
+              <Route path='Blog' element={<Blog/>}/>
+              <Route path='Profile' element={<Profile/>}/>
             </Route>
             <Route path='/Login' element={<Login/>}/>
+            <Route path='/Regiter' element={<Register/>}/>
+            <Route path='/learing/:idActive/:idcourse' element={
+              <ProtectedRoute>
+                <Learing/>
+              </ProtectedRoute>
+            }/>
+            {/* Admin page */}
+            <Route path='/Admin/*' element={
+              <ProtectedRoute>
+                  <Admin />
+              </ProtectedRoute>
+            }>
+              <Route path='ManagerUser' element={<ManagerUser/>}/>
+              <Route path='ManagerCourse' element={<ManagerCourse/>}>
+                <Route index element={<DashBoard/>}/>
+                <Route path='Detail/:id' element={<DetailCourse/>}/> 
+              </Route> 
+              <Route path='ManagerCertificate' element={<ManagerCertificate/>}>
+                <Route index element={<Certificate/>}/>
+                <Route path='Detail/:idCourse' element={<DetailCertificate/>}/>      
+              </Route> 
+            </Route>  
+            <Route path='*' element={<NotFound></NotFound>}></Route> 
         </Routes>
     </div>
   );

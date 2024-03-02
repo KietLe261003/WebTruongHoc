@@ -1,21 +1,16 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faAnchor, faBars, faNewspaper, faUserGroup, faBookBookmark, faBookOpen, faUser } from '@fortawesome/free-solid-svg-icons';
 import $ from 'jquery'; // Import jQuery here
-import { Routes, Route , Link } from 'react-router-dom';
-
-
+import {Link, Outlet } from 'react-router-dom';
+import { signOut } from 'firebase/auth';
+import {auth} from '../../../firebase.js';
+import {AuthContext} from '../../../context/AuthContext.js'
 
 import './Layout.css';
 
-import Home from '../../../Page/Home/Index.js'
-import Course from '../../../Page/Course/Index.js';
-import CourseOutline from '../../../Page/Course_Outline/Index.js';
-import Group from '../../../Page/Group/Index.js';
-import Class from '../../../Page/Class/Index.js';
-import Blog from '../../../Page/Blog/Index.js';
-import Profile from '../../../Page/Profile/Index.js';
 function Layout() {    
+    const {currentUser}=useContext(AuthContext);
     const mobileScreen = window.matchMedia("(max-width: 990px )");
     function ClickMenuBar() {
         if (mobileScreen.matches) {
@@ -73,7 +68,7 @@ function Layout() {
                     <a href="/Blog" class="dashboard-nav-item"><FontAwesomeIcon className="Icon" icon={faNewspaper}/> Bài viết </a>
                     <a href="/Profile" class="dashboard-nav-item"><FontAwesomeIcon className="Icon" icon={faUser}/> Trang cá nhân </a>
                     <div class="nav-item-divider"></div>
-                    <a href="/Login" class="dashboard-nav-item"><i class="fas fa-sign-out-alt"></i> Đăng xuất </a>
+                    <button onClick={()=> signOut(auth)} class="dashboard-nav-item"><i class="fas fa-sign-out-alt"></i> Đăng xuất </button>
                 </nav>
             </div>
             <div class='dashboard-app'>
@@ -81,18 +76,22 @@ function Layout() {
                     <button onClick={ClickMenuBar} href="/" class="menu-toggle">
                         <FontAwesomeIcon className="Icon" icon={faBars} />
                     </button>
-                    <a href='/Login' className="btn btn-primary" style={{ marginLeft: 'auto' }}>Đăng nhập</a>
+                    {
+                        currentUser==null ? <a href='/Login' className="btn btn-primary" style={{ marginLeft: 'auto' }}>Đăng nhập</a>
+                            : <div class="flex items-center mr-auto" style={{marginLeft: '85%'}}>
+                                <div class="inline-flex w-12 h-12">
+                                    <img src={currentUser.photoURL} alt="aji" class=" relative w-12 h-12 object-cover rounded-2xl" />
+                                    <span></span>
+                                </div>
+                                <div class="flex flex-col ml-3">
+                                    <div class="font-medium leading-none text-black-500">{currentUser.displayName}</div>
+                                    <p class="text-sm text-gray-500 leading-none mt-1">UI/UX Designer</p>
+                                </div>
+                            </div>
+                    }
                 </header>
                 <div class='dashboard-content'>
-                    <Routes>
-                        <Route path='/' element={<Home/>}/>
-                        <Route path='/CourseOutline' element={<CourseOutline/>}/>
-                        <Route path='/Course' element={<Course/>}/>
-                        <Route path='/Group' element={<Group/>}/>
-                        <Route path='/Class' element={<Class/>}/>
-                        <Route path='/Blog' element={<Blog/>}/>
-                        <Route path='/Profile' element={<Profile/>}/>
-                    </Routes>
+                    <Outlet/>
                 </div>
                 {/* <Footer></Footer> */}
             </div>

@@ -1,9 +1,9 @@
 import React from "react";
 import './Login.css';
-import Header from '../../../src/Components/Login/Header';
-import ListInputLogin from '../../../src/Components/Login/ListInputLogin'
-import ListIcon from '../../../src/Components/Login/ListIcon';
 import { Link } from "react-router-dom";
+import Header from '../../../src/Components/Login/Header';
+import ListInput from '../../../src/Components/Login/ListInput';
+import ListIcon from '../../../src/Components/Login/ListIcon';
 function Login() {
     return (
         <section class="vh-100 gradient-custom">
@@ -14,11 +14,11 @@ function Login() {
                             <div class="card-body p-5 text-center">
                                 <div class="mb-md-5 mt-md-4 pb-5">
                                     <Header/>
-                                    <ListInputLogin/>
+                                    <ListInput/>
                                     <ListIcon/>
                                 </div>
                                 <div>
-                                    <p class="mb-0">Don't have an account? <Link to={"/Regiter"} class="text-white-50 fw-bold">Sign Up</Link>
+                                    <p class="mb-0">Don't have an account? <Link to={"/Login"} class="text-white-50 fw-bold">Sign In</Link>
                                     </p>
                                 </div>
 
