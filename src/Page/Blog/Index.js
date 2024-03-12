@@ -1,8 +1,10 @@
 import React from 'react';
-import ListCardBlog from '../../Components/Blog/ListCardBlog';
+import { Outlet } from 'react-router-dom';
 function Blog() {
     return (
-        <ListCardBlog></ListCardBlog>
+        <div>
+            <Outlet/>
+        </div>
     );
 }
 

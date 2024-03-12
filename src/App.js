@@ -26,6 +26,8 @@ import CompleCourse from './Page/Course/CompleCourse.js';
 import ManagerCertificate from './Admin/Page/ManagerCertificate/ManagerCertificate.js';
 import Certificate from './Admin/Page/ManagerCertificate/Certificate.js';
 import DetailCertificate from './Admin/Page/ManagerCertificate/DetailCertificate.js';
+import ListBlog from './Page/Blog/ListBlog.js';
+import CreateBlog from './Page/Blog/CreateBlog.js';
 function App() {
   const {currentUser} = useContext(AuthContext);
   const ProtectedRoute = ({children}) => {
@@ -72,7 +74,10 @@ function App() {
               </Route>
               <Route path='Group' element={<Group/>}/>
               <Route path='Class' element={<Class/>}/>
-              <Route path='Blog' element={<Blog/>}/>
+              <Route path='Blog' element={<Blog/>}>
+                  <Route index element={<ListBlog/>}></Route>
+                  <Route path='CreateBlog' element={<CreateBlog/>}></Route>
+              </Route>
               <Route path='Profile' element={<Profile/>}/>
             </Route>
             <Route path='/Login' element={<Login/>}/>
