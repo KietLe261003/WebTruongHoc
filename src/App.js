@@ -82,11 +82,7 @@ function App() {
               </Route>
               <Route path='Group' element={<Group/>}/>
               <Route path='Class' element={<Class/>}/>
-              <Route path='Blog' element={<Blog/>}>
-                  <Route index element={<ListBlog/>}></Route>
-                  <Route path='CreateBlog' element={<CreateBlog/>}></Route>
-              </Route>
-              <Route path='DetailBlog/:idBlog' element={<DetailBlog/>}></Route>
+              <Route path='Blog' element={<Blog/>}/>
               <Route path='Profile' element={<Profile/>}/>
               <Route path='ProfileOrther/:IdUser' element={<ProfilePageOrther/>}/>
             </Route>

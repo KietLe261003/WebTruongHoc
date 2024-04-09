@@ -4,6 +4,7 @@ import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } fro
 import { db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import Paymentbtn from './PaymentBtn';
+
 function InforCourse(props) {
     const { currentUser } = useContext(AuthContext);
     const course = props.course;
@@ -39,16 +40,8 @@ function InforCourse(props) {
             rm.forEach((it) => {
                 dt.push(it.data());
             })
-            dt.sort((a,b)=> a.timeCreate-b.timeCreate);
-            if(dt.length<=0)
-            {
-                alert("Khóa học chưa có hoạt động");
-            }
-            else
-            {
-                const idActive = dt[0].id;
-                navigate(`/learing/${idActive}/${course.id}`);
-            }
+            const idActive = dt[0].id
+            navigate(`/learing/${idActive}/${course.id}`);
         }
         else {
             
@@ -76,18 +69,13 @@ function InforCourse(props) {
             const q = query(collection(db, "active"), where("idRoadMap", "==", idRoadMap));
             const rm = await getDocs(q);
             await Promise.all(rm.docs.map(async (it) => {
-                dt.push(it.data());    
+                dt.push(it.data());
+            
+                
             }));
-            dt.sort((a,b)=> a.timeCreate-b.timeCreate);
-            if(dt.length<=0)
-            {
-                alert("Khóa học chưa có hoạt động");
-            }
-            else
-            {
-                const idActive = dt[0].id;
-                navigate(`/learing/${idActive}/${course.id}`);
-            }
+            
+            const idActive = dt[0].id;
+            navigate(`/learing/${idActive}/${course.id}`);
         }
     }
     const buttonApply = () => {

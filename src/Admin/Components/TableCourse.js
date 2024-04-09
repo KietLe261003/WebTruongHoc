@@ -11,93 +11,18 @@ export default function DataTable(props) {
   const {currentUser}=useContext(AuthContext);
   const [course, setCourse] = useState([]);
   const navigate = useNavigate();
-
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 5;
-  const lastIndex = currentPage * recordsPerPage;
-  const firstIndex = lastIndex - recordsPerPage;
-
-  // Sử dụng useState để giữ giá trị và cập nhật chúng
-  const [records, setRecords] = useState([]);
-  const [npage, setNPage] = useState(0);
-  //const [numbers, setNumbers] = useState([]);
-  const [checkAdmin,setCheckAdmin]=useState(true);
-  const getCourse = async () => {
-    const getUser = await getDoc(doc(db,"users",currentUser.uid));
-    if(getUser.exists())
-    {
-        let q= collection(db,"course");
-        if(getUser.data().role==="teacher")
-        {
-            q = query(collection(db,"course"),where("teacher","==",getUser.data().id));
-            setCheckAdmin(false);
-        }
-        const querySnapshot = await getDocs(q);
-        const data = [];
-        querySnapshot.forEach((doc) => {
-          const valu = doc.data();
-          data.push(valu);
-        });
-  
-        setRecords(data.slice(firstIndex, lastIndex));
-        setNPage(Math.ceil(data.length / recordsPerPage));
-        //setNumbers([...Array(npage + 1).keys()].slice(1));
-        setCourse(data);
-    }
-  }
   useEffect(() => {
     const fetch = async () => {
-      const getUser = await getDoc(doc(db,"users",currentUser.uid));
-      if(getUser.exists())
-      {
-          let q= collection(db,"course");
-          if(getUser.data().role==="teacher")
-          {
-              setCheckAdmin(false);
-              q = query(collection(db,"course"),where("teacher","==",getUser.data().id));
-          }
-          const querySnapshot = await getDocs(q);
-          const data = [];
-          querySnapshot.forEach((doc) => {
-            const valu = doc.data();
-            data.push(valu);
-          });
-    
-          setRecords(data.slice(firstIndex, lastIndex));
-          setNPage(Math.ceil(data.length / recordsPerPage));
-          //setNumbers([...Array(npage + 1).keys()].slice(1));
-          setCourse(data);
-      }
+      const querySnapshot = await getDocs(collection(db, "course"));
+      const data = [];
+      querySnapshot.forEach((doc) => {
+        const valu = doc.data();
+        data.push(valu);
+      });
+      setCourse(data);
     }
     fetch();
-  }, [npage,firstIndex,lastIndex,currentUser])
-  const handlePre = () => {
-    setCurrentPage(currentPage - 1);
-  }
-  const handleNext = () => {
-    setCurrentPage(currentPage + 1);
-  }
-  const handleSearch = (txt) => {
-    if(txt==="")
-    {
-      setRecords(course.slice(firstIndex, lastIndex));
-      setNPage(Math.ceil(course.length / recordsPerPage));
-    }
-    else
-    setRecords(course.filter(item => item.nameCourse.includes(txt) || item.teacher.includes(txt) || item.id.includes(txt)));
-  }
-  const handlePublic = async (id,status)=>{
-      try {
-        const newStatus=!status;
-        await updateDoc(doc(db,"course",id),{
-          isPublic: newStatus
-        })
-        getCourse();
-      } catch (error) {
-          console.log("Lỗi nek: "+error);
-      }
-  }
+  }, [])
   return (
     <section class="container px-4 mx-auto">
       <div class="sm:flex sm:items-center sm:justify-between">
@@ -208,22 +133,18 @@ export default function DataTable(props) {
                           </div>
                         </td>
                         <td class="px-4 py-4 text-sm whitespace-nowrap">
-                          <div class="inline px-3 py-1 text-sm font-normal rounded-full gap-x-2 dark:bg-gray-800">
-                            {
-                              item.isPublic === true ? 
-                                checkAdmin===true ?
-                                <Button className=' bg-yellow-400' onClick={() => { handlePublic(item.id,item.isPublic) }}>Ẩn khóa học</Button>:
-                                <Button className=' bg-green-500'>Công khai</Button>
-                              : 
-                                checkAdmin===true ?
-                                <Button className=' bg-green-500' onClick={() => { handlePublic(item.id,item.isPublic) }}>Công khai</Button> :
-                                <Button className=' bg-yellow-400'>Chờ duyệt</Button>
-                            }
+                          <div class="inline px-3 py-1 text-sm font-normal rounded-full text-emerald-500 gap-x-2 bg-emerald-100/60 dark:bg-gray-800">
+                            {item.isPublic===true ? "Công khai" : "Riêng tư"}
                           </div>
                         </td>
                         <td class="px-4 py-4 text-sm whitespace-nowrap">
                           <div class="flex items-center ">
-                            {item.type === "1" ? "Trả phí" : "Miễn Phí"}
+                            {item.time}
+                          </div>
+                        </td>
+                        <td class="px-4 py-4 text-sm whitespace-nowrap">
+                          <div class="flex items-center ">
+                            {item.type==="1" ? "Trả phí" : "Miễn Phí"}
                           </div>
                         </td>
                         <td class="px-4 py-4 text-sm whitespace-nowrap">
