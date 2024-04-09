@@ -120,6 +120,24 @@ function UpdateAndRemoveCourse(props) {
                         const deleteFilePromise = deleteObject(desertRef);
                         deletePromises.push(deleteActivePromise, deleteFilePromise);
                     }
+                    const qd = query(collection(db, "detailActive"), where("IdActive", "==", active.id));
+                    const deleteDetail = await getDocs(qd);
+
+                    // Tạo một mảng promises cho việc xóa chi tiết active
+                    const deleteDetailPromises = deleteDetail.docs.map(async (item) => {
+                        if(item.exists())
+                        {
+                            const idD=item.data().id+"";
+                            try {
+                                await deleteDoc(doc(db, "detailActive", idD));
+                            } catch (error) {
+                                alert("Lỗi xóa detail");
+                                console.log(error);
+                            }
+                            
+                        }
+                    });
+                    await Promise.all(deleteDetailPromises);
                 }));
 
                 try {

@@ -12,7 +12,7 @@ function ManageActive() {
                     <img class="w-7 filter grayscale" src="https://v1.tailwindcss.com/_next/static/media/tailwindcss-mark.6ea76c3b72656960a6ae5ad8b85928d0.svg" alt="taiwind css" />
                 </div>
                 <div class="text-2xl text-gray-100 font-medium leading-8 mt-5">20</div>
-                <div class="text-sm text-gray-500">Components</div>
+                <div class="text-sm text-gray-500">Khóa học</div>
             </div>
         </div>
         <div class="col-span-12 sm:col-span-4">
@@ -24,7 +24,7 @@ function ManageActive() {
                     <i class="fab fa-behance text-xl text-gray-400"></i>
                 </div>
                 <div class="text-2xl text-gray-100 font-medium leading-8 mt-5">99</div>
-                <div class="text-sm text-gray-500">Projects</div>
+                <div class="text-sm text-gray-500">Bài viết</div>
             </div>
         </div>
         <div class="col-span-12 sm:col-span-4">
@@ -36,7 +36,7 @@ function ManageActive() {
                     <i class="fab fa-codepen text-xl text-gray-400"></i>
                 </div>
                 <div class="text-2xl text-gray-100 font-medium leading-8 mt-5">50</div>
-                <div class="text-sm text-gray-500">Pen Items</div>
+                <div class="text-sm text-gray-500">Chứng chỉ</div>
             </div>
         </div>
     </div>);

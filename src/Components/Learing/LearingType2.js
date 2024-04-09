@@ -20,6 +20,25 @@ function LearingType2(props) {
     };
     const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
+    const updateFinal = async (idUser,currentActive)=>{
+        const ref = collection(db, "listCourseUser");
+                const q1 = query(ref, where("IdUser", "==", idUser), where("IdCourse", "==", idcourse));
+                const docCheck = await getDocs(q1);
+                if (!docCheck.empty) {
+                    const fl=(currentActive+1)/activeAll.length*100;
+                    //alert(fl);
+                    try {
+                        await updateDoc(doc(db,"listCourseUser",docCheck.docs[0].data().id),{
+                            final: fl
+                        })
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
+                else {
+                    console.log(false);
+                }
+    }
     const handleSubmit = async (e) => {
         e.preventDefault();
         const file = e.target[0].files[0];
@@ -41,12 +60,12 @@ function LearingType2(props) {
                         const docCheck = await getDocs(q);
                         if (docCheck.empty) {
                             let id = 1;
-                            const q = query(collection(db, "detailActive"), orderBy("id", "desc"), limit(1));
+                            const q = query(collection(db, "detailActive"), orderBy("timeUpdate", "desc"), limit(1));
                             const querySnapshot = await getDocs(q);
                             if (!querySnapshot.empty) {
                                 const lastDoc = querySnapshot.docs[0];
                                 const lastId = lastDoc.data().id;
-                                id = lastId + 1;
+                                id = parseInt(lastId) + 1;
                             }
                             //id = "" + id;
                             let id1=""+id;
@@ -66,6 +85,7 @@ function LearingType2(props) {
                                         courseComplete: arrayUnion({ idcourse: idcourse, time: timeComple })
                                     });
                                 }
+                                updateFinal(idUser,currentActive);
                                 setSuccess(true);
                                 const timeoutId = setTimeout(() => {
                                     setSuccess(false);
@@ -83,7 +103,10 @@ function LearingType2(props) {
                             }
                         }
                         else {
+                            
                             const idDetail = docCheck.docs[0].data().id;
+                            if(docCheck.docs[0].data().pass===false)
+                            {
                                 await updateDoc(doc(db, "detailActive", idDetail), {
                                     pass: true,
                                     fileURL: downloadURL,
@@ -96,6 +119,7 @@ function LearingType2(props) {
                                         courseComplete: arrayUnion({ idcourse: idcourse, time: timeComple })
                                     });
                                 }
+                                updateFinal(idUser,currentActive);
                                 setSuccess(true);
                                 const timeoutId = setTimeout(() => {
                                     setSuccess(false);
@@ -108,6 +132,7 @@ function LearingType2(props) {
                                     }
                                 }, 3000);
                                 console.log(timeoutId);
+                            }
                         }
                     } catch (err) {
                         console.log(err);

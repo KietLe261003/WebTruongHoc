@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import CardCourse from './CardCourse';
-import { collection, getDocs} from "firebase/firestore";
+import { collection, getDocs, query, where} from "firebase/firestore";
 import { db } from "../../firebase";
 function ListCard() {
     const [Course,setCourse]= useState([]);
     useEffect(()=>{
         const unSub = async () =>{
             const c=[];
-            const data= await getDocs(collection(db,"course"));
+            const q= query(collection(db,"course"),where("isPublic","==",true));
+            const data= await getDocs(q);
             data.forEach((index)=>{
                 c.push(index.data());
             })

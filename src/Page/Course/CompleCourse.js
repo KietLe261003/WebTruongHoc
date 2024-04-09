@@ -1,5 +1,5 @@
-import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import React, { useContext, useState } from "react";
+import { Timestamp, arrayUnion, doc, getDoc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { db } from "../../firebase";
 import { AuthContext } from "../../context/AuthContext";
@@ -57,23 +57,39 @@ function CompleCourse() {
         const email = e.target[1].value;
         const phoneNumber = e.target[2].value;
         const Address = e.target[3].value;
+        const reason = e.target[4].value;
         try {
             const certificate = await getDoc(doc(db, "certificate", idCourse));
             const docUser = await getDoc(doc(db, "users", currentUser.uid));
             const idUser = docUser.data().id;
+            const time = Timestamp.now();
             if (!certificate.exists()) {
                 await setDoc(doc(db, "certificate",idCourse), {
                     id: idCourse,
-                    users: arrayUnion({ IdUser: idUser, name: name,email: email,phoneNumber: phoneNumber, address: Address,status: 0})
+                    users: arrayUnion({ IdUser: idUser, name: name,email: email,phoneNumber: phoneNumber, address: Address, reason: reason,status: 0, time: time})
                 });
+                const getCourse = await getDoc(doc(db, "course",idCourse));
+                if(getCourse.exists())
+                {
+                    await updateDoc(doc(db, "course",idCourse),{
+                        numberCertificate: getCourse.data().numberCertificate+1
+                    })
+                }
                 alert("Cảm ơn bạn đã đồng hành cùng khóa học của chúng tôi");
                 navigate("/");
             }
             else {
                 await updateDoc(doc(db, "certificate", idCourse), {
                     id: idCourse,
-                    users: arrayUnion({ IdUser: idUser, name: name,email: email,phoneNumber: phoneNumber, address: Address,status: 0})
+                    users: arrayUnion({ IdUser: idUser, name: name,email: email,phoneNumber: phoneNumber, address: Address,reason: reason,status: 0,time: time})
                 });
+                const getCourse = await getDoc(doc(db, "course",idCourse));
+                if(getCourse.exists())
+                {
+                    await updateDoc(doc(db, "course",idCourse),{
+                        numberCertificate: getCourse.data().numberCertificate+1
+                    })
+                }
                 alert("Cảm ơn bạn đã đồng hành cùng khóa học của chúng tôi");
                 navigate("/");
             }
@@ -84,13 +100,33 @@ function CompleCourse() {
     const closeRating =()=>{
         setCheckRating(false);
     }
+    const [checkSend,setChekSend]=useState(0);
+    useEffect(()=>{
+        const unsub = onSnapshot(doc(db, "certificate", idCourse), async (i) => {
+            if(i.exists())
+            {
+                const item = i.data().users;
+                const docUser = await getDoc(doc(db,"users",currentUser.uid));
+                const idUser = docUser.data().id;
+                item.forEach((it)=>{
+                    if(it.IdUser===idUser)
+                    {
+                        setChekSend(checkSend+1);
+                    }
+                })
+            }
+        });
+        return ()=>{
+            unsub();
+        }
+    },[idCourse,currentUser.uid,checkSend])
     return (
         <div class="relative flex items-top justify-center min-h-screen bg-white dark:bg-gray-900 sm:items-center sm:pt-0">
             <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
                 <div class="mt-8 overflow-hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2">
                         {
-                            checkRating &&
+                            checkRating && checkSend === 0 && 
                             <div class="p-6 mr-2 bg-gray-100 dark:bg-gray-800 sm:rounded-lg">
                                 <div class="bg-white min-w-1xl flex flex-col rounded-xl shadow-lg">
                                     <div class="px-12 py-5">
@@ -153,7 +189,13 @@ function CompleCourse() {
                                         <label for="address" class="hidden">Address</label>
                                         <input type="text" name="address" id="address" placeholder="Địa chỉ nhận" class="w-100 mt-2 py-3 px-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-700 text-gray-800 font-semibold focus:border-indigo-500 focus:outline-none" />
                                     </div>
-
+                                    {
+                                        checkSend >= 1 &&
+                                        <div class="flex flex-col mt-2">
+                                            <label for="address" class="hidden">Lý do</label>
+                                            <input type="text" name="address" id="address" placeholder="Vui lòng điền lý do nếu như bạn muốn cấp lại" class="w-100 mt-2 py-3 px-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-700 text-gray-800 font-semibold focus:border-indigo-500 focus:outline-none" />
+                                        </div>
+                                    }
                                     <button type="submit" class="md:w-32 bg-indigo-600 hover:bg-blue-dark text-white font-bold py-3 px-6 rounded-lg mt-3 hover:bg-indigo-500 transition ease-in-out duration-300">
                                         Submit
                                     </button>

@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Modal from "react-modal";
 import {v4 as uuid} from 'uuid';
 import { db, storage } from "../../firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { AuthContext } from "../../context/AuthContext";
 const customStyles = {
     content: {
         top: '50%',
@@ -16,6 +17,7 @@ const customStyles = {
     },
 };
 function CreateCourse() {
+    const {currentUser}=useContext(AuthContext);
     const [modalIsOpen, setIsOpen] = React.useState(false);
     const [err,setErr] = useState(false);
     const [InputPrice,setInputPrice] = useState(false);
@@ -32,15 +34,16 @@ function CreateCourse() {
         console.log(e);
         const id =uuid();
         const nameCourse=e.target[0].value;
-        const teacher=e.target[1].value;
-        const photoURL=e.target[2].files[0];
-        const description=e.target[3].value;
-        const types= e.target[4].value;
+        const photoURL=e.target[1].files[0];
+        const description=e.target[2].value;
+        const types= e.target[3].value;
         const storageRef = ref(storage,`Course/${nameCourse+id}`);
         try {
             await uploadBytesResumable(storageRef, photoURL).then(()=>{
                 getDownloadURL(storageRef).then( async (dowloadURL)=>{
                     try {
+                        const getUser= await getDoc(doc(db,"users",currentUser.uid));
+                        const teacher=getUser.data().id;
                         await setDoc(doc(db,"course",id),{
                             id: id,
                             nameCourse: nameCourse,
@@ -121,11 +124,6 @@ function CreateCourse() {
                                     class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-700 "
                                 />
                             </div>  
-                            <div class="md:col-span-2">
-                                <input type="text" id="email" name="teacher" placeholder="Giáo viên dạy" 
-                                class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-700" />
-                            </div>
-                            
                             <div class="md:col-span-2">
                                 <label for="subject" class="float-left block  font-normal text-gray-400 text-lg">Chọn hình ảnh của khóa học:</label>
                                 <input type="file" id="file" name="file" placeholder="Charger votre fichier" class="peer block w-full appearance-none border-none   bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0" />

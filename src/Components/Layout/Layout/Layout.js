@@ -1,12 +1,12 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faAnchor, faBars, faNewspaper, faUserGroup, faBookBookmark, faBookOpen, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faAnchor, faBars, faNewspaper, faBookOpen, faUser } from '@fortawesome/free-solid-svg-icons';
 import $ from 'jquery'; // Import jQuery here
 import {Link, Outlet } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import {auth} from '../../../firebase.js';
 import {AuthContext} from '../../../context/AuthContext.js'
-
+import Footer from '../Footer/Footer.js'
 import './Layout.css';
 
 function Layout() {    
@@ -19,17 +19,8 @@ function Layout() {
             $(".dashboard").toggleClass("dashboard-compact");
         }
     }
-    function ShowDropDown(event) {
-        var DropDown = event.target;
-        $(DropDown).closest(".dashboard-nav-dropdown")
-            .toggleClass("show")
-            .find(".dashboard-nav-dropdown")
-            .removeClass("show");
-        $(DropDown).parent()
-            .siblings()
-            .removeClass("show");
-    }
-    
+    const [checkActive,setCheckActive]=useState(0);
+
     return (
         <div class='dashboard'>
             <div class="dashboard-nav">
@@ -43,32 +34,21 @@ function Layout() {
                     </a>
                 </header>
                 <nav class="dashboard-nav-list">
-                    <Link to="/" className="dashboard-nav-item">
+                    <Link to="/" onClick={()=>{setCheckActive(0)}} className={`dashboard-nav-item ${checkActive===0 && "active"}`}>
                         <FontAwesomeIcon className="Icon" icon={faHome} />
                         Trang chủ
                     </Link>
-                    <a href="/CourseOutline" class="dashboard-nav-item active">
-                        <FontAwesomeIcon className="Icon" icon={faBookBookmark} />
-                        Lộ trình
-                    </a>
-                    <div class='dashboard-nav-dropdown'>
-                        <Link to="/Course"  onClick={ShowDropDown} class="dashboard-nav-item dashboard-nav-dropdown-toggle" style={{border: 0}}>
-                            <FontAwesomeIcon className="Icon" icon={faBookOpen} /> Các khóa học
-                        </Link>
-                        <div class='dashboard-nav-dropdown-menu'>
-                            <a href="/" class="dashboard-nav-dropdown-item">Tất cả</a>
-                            <a href="/" class="dashboard-nav-dropdown-item">Back-End</a>
-                            <a href="/" class="dashboard-nav-dropdown-item">Font-End</a>
-                            <a href="/" class="dashboard-nav-dropdown-item">Data</a>
-                            <a href="/" class="dashboard-nav-dropdown-item">Tiếng anh</a>
-                            <a href="/" class="dashboard-nav-dropdown-item">AI</a>
-                        </div>
-                    </div>
-                    <a href="/Group" class="dashboard-nav-item"><FontAwesomeIcon className="Icon" icon={faUserGroup} />Các lớp học </a>
-                    <a href="/Blog" class="dashboard-nav-item"><FontAwesomeIcon className="Icon" icon={faNewspaper}/> Bài viết </a>
-                    <a href="/Profile" class="dashboard-nav-item"><FontAwesomeIcon className="Icon" icon={faUser}/> Trang cá nhân </a>
+                    <Link to="/Course" onClick={()=>{setCheckActive(1)}} className={`dashboard-nav-item ${checkActive===1 && "active"}`} style={{border: 0}}>
+                        <FontAwesomeIcon className="Icon" icon={faBookOpen} /> Các khóa học
+                    </Link>
+                    <Link to="/Blog" onClick={()=>{setCheckActive(2)}} className={`dashboard-nav-item ${checkActive===2 && "active"}`}>
+                        <FontAwesomeIcon className="Icon" icon={faNewspaper}/> Bài viết 
+                    </Link>
+                    <Link to="/Profile" onClick={()=>{setCheckActive(3)}} className={`dashboard-nav-item ${checkActive===3 && "active"}`} >
+                        <FontAwesomeIcon className="Icon" icon={faUser}/> Trang cá nhân 
+                    </Link>
                     <div class="nav-item-divider"></div>
-                    <button onClick={()=> signOut(auth)} class="dashboard-nav-item"><i class="fas fa-sign-out-alt"></i> Đăng xuất </button>
+                    <button onClick={()=> signOut(auth)} ><i class="fas fa-sign-out-alt"></i> Đăng xuất </button>
                 </nav>
             </div>
             <div class='dashboard-app'>
@@ -93,7 +73,7 @@ function Layout() {
                 <div class='dashboard-content'>
                     <Outlet/>
                 </div>
-                {/* <Footer></Footer> */}
+                <Footer></Footer>
             </div>
         </div>
     );

@@ -1,16 +1,37 @@
-import React from "react";
+import React, { useState } from "react";
 import DetailActiveUser from "./DetailActiveUser";
 import AcceptCertificate from "./AcceptCertificate";
+const btnCheck={
+    check: "px-5 py-2 text-xs font-medium text-gray-600 transition-colors duration-200 bg-gray-100 sm:text-sm dark:bg-gray-800 dark:text-gray-300",
+    unCheck: "px-5 py-2 text-xs font-medium text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
+}
 function TableDetailCertificate(props) {
     const certificateUser = props.certificateUser;
     const active = props.activeType2;
     const idCourse = props.idCourse;
+    const [certificate,setCertificate]=useState(certificateUser);
+    const handleSearch = (txt)=>{
+        setCertificate(certificateUser.filter(item => item.name.includes(txt) || item.IdUser.includes(txt) || item.address.includes(txt) || item.phoneNumber.includes(txt) || item.email.includes(txt)))
+    }
+    const [checkBtn,setCheckBtn]=useState(0);
+    const handleFilter = (e) =>{
+        if(e===0)
+        setCertificate(certificateUser);
+        else if(e===1)
+        setCertificate(certificateUser.filter(item => item.status===0))
+        else if(e===2)
+        setCertificate(certificateUser.filter(item => item.status===1))
+        else if(e===3)
+        setCertificate(certificateUser.filter(item => item.status===-1))
+
+        setCheckBtn(e);
+    }
     return (
         active &&
         <div>
             <div class="mt-6">
                 <div class="flex items-center gap-x-3">
-                    <h2 class="text-lg font-medium text-gray-800 dark:text-white">Customers</h2>
+                    <h2 class="text-lg font-medium text-gray-800 dark:text-white">Bộ lọc</h2>
 
                     <span class="px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full dark:bg-gray-800 dark:text-blue-400">240 vendors</span>
                 </div>
@@ -19,16 +40,19 @@ function TableDetailCertificate(props) {
             </div>
             <div class="mb-6 md:flex md:items-center md:justify-between">
                 <div class="inline-flex overflow-hidden bg-white border divide-x rounded-lg dark:bg-gray-900 rtl:flex-row-reverse dark:border-gray-700 dark:divide-gray-700">
-                    <button class="px-5 py-2 text-xs font-medium text-gray-600 transition-colors duration-200 bg-gray-100 sm:text-sm dark:bg-gray-800 dark:text-gray-300">
-                        View all
+                    <button onClick={()=>{handleFilter(0)}} class={checkBtn===0 ? btnCheck.check : btnCheck.unCheck}>
+                        Tất cả
+                    </button>
+                    <button onClick={()=>{handleFilter(1)}} class={checkBtn===1 ? btnCheck.check : btnCheck.unCheck}>
+                        Chưa được duyệt
                     </button>
 
-                    <button class="px-5 py-2 text-xs font-medium text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">
-                        Monitored
+                    <button onClick={()=>{handleFilter(2)}} class={checkBtn===2 ? btnCheck.check : btnCheck.unCheck}>
+                        Đã chấp nhận
                     </button>
 
-                    <button class="px-5 py-2 text-xs font-medium text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">
-                        Unmonitored
+                    <button onClick={()=>{handleFilter(3)}} class={checkBtn===3 ? btnCheck.check : btnCheck.unCheck}>
+                        Đã Hủy
                     </button>
                 </div>
 
@@ -39,7 +63,7 @@ function TableDetailCertificate(props) {
                         </svg>
                     </span>
 
-                    <input type="text" placeholder="Search" class="block w-full py-1.5 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40" />
+                    <input type="text" placeholder="Search" onChange={(e)=>{handleSearch(e.target.value)}} class="block w-full py-1.5 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40" />
                 </div>
             </div>
             {
@@ -71,7 +95,7 @@ function TableDetailCertificate(props) {
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
                         {
-                            certificateUser.map((item) => (
+                            certificate.map((item) => (
                                 <tr>
                                     <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
                                         <div>
@@ -97,16 +121,16 @@ function TableDetailCertificate(props) {
                                         </div>
                                     </td>
                                     <td class="px-4 py-4 text-sm whitespace-nowrap">
-                                        <AcceptCertificate inforUser={item} idCourse={idCourse}/>
+                                        <AcceptCertificate inforUser={item} idCourse={idCourse} reason={item.reason}/>
                                     </td>
                                     <td class="px-4 py-4 text-sm whitespace-nowrap">
                                         <div style={{ display: "flex", flexDirection: "row", justifyContent: 'center' }}>
-                                            <DetailActiveUser active={active} IdUser={item.IdUser}></DetailActiveUser>
+                                            <DetailActiveUser role={1} active={active} IdUser={item.IdUser}></DetailActiveUser>
                                         </div>
                                     </td>
                                 </tr>
                             ))
-                        }
+                        }        
                     </tbody>
                 </table>
             }

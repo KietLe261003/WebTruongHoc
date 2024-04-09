@@ -2,7 +2,7 @@ import React from "react";
 
 function Home() {
     return ( 
-        <div>This is home admin haha</div>
+        <div>This is home admin</div>
      );
 }
 

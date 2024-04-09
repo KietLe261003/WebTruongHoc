@@ -1,14 +1,51 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import NavBarAdmin from "../Components/NavBar";
-import {Outlet} from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import './Index.css';
+import { AuthContext } from "../../context/AuthContext";
+import { doc, getDoc} from "firebase/firestore";
+import { db } from "../../firebase";
 
 
 
 function Index() {
+    const { currentUser } = useContext(AuthContext);
+    const navigate = useNavigate();
+    const [check, setCheck] = useState(null);
+    useEffect(() => {
+        const getUser = async () => {
+            try {
+                const docRef = doc(db, "users", currentUser.uid);
+                const it = await getDoc(docRef);
+                if(it.exists())
+                {
+                    console.log(it.data());
+                    if(it.data().role!=="admin" && it.data().role!=="teacher")
+                    {
+                        navigate("/");
+                    }
+                    else 
+                    {
+                        setCheck(it.data().role);
+                    }
+                }
+                else
+                {
+                    navigate("/");
+                }
+            } catch (error) {
+                console.log(error);
+            }
+
+        }
+        return () => {
+            getUser();
+        }
+    }, [currentUser, navigate, check])
     return (
-        <div class="flex min-h-screen">     
-            <NavBarAdmin/>
+        check!==null &&
+        <div class="flex min-h-screen">
+            <NavBarAdmin role={check} />
             <div class="flex flex-col w-full">
                 <header class="text-white bg-blue-400 sticky left-auto top-0 right-0">
                     <div class="h-12 px-6 flex relative items-center justify-end">
@@ -20,7 +57,7 @@ function Index() {
                         </button>
 
                         <button class="relative block h-8 w-8 rounded-full overflow-hidden shadow focus:outline-none">
-                            <img class="h-full w-full object-cover" src="https://www.w3schools.com/howto/img_avatar.png" alt="Avatar"/>
+                            <img class="h-full w-full object-cover" src="https://www.w3schools.com/howto/img_avatar.png" alt="Avatar" />
                         </button>
                     </div>
                 </header>
@@ -38,10 +75,10 @@ function Index() {
                 </div>
                 <div class="w-full p-4">
                     <main role="main" class="w-full flex flex-col h-screen content-center">
-                        <Outlet/>
+                        <Outlet />
                     </main>
                 </div>
-            </div>  
+            </div>
         </div>
     );
 }

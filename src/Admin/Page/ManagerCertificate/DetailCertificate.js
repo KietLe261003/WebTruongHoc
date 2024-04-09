@@ -7,11 +7,25 @@ function DetailCertificate() {
     const { idCourse } = useParams();
     const [certificateUser, setCertificateUser] = useState(null);
     const [active,setActive]=useState(null);
+    const [all,setAll]=useState(0);
+    const [acp,setAcp]=useState(0);
+    const [nacp,setNacp]=useState(0);
     useEffect(() => {
-
-        const unsub = onSnapshot(doc(db, "certificate", idCourse), (doc) => {
+        const unsub = onSnapshot(doc(db, "certificate", idCourse), (doc) => {   
+            const len = doc.data().users;
+            len.forEach((item)=>{
+                if(item.status===1)
+                    setAcp(acp+1);
+                    if(item.status===-1)
+                    setNacp(nacp+1);
+            })
             setCertificateUser(doc.data().users);
         });
+        const getCoureseUserAcp= async ()=>{
+            const q= query(collection(db,"listCourseUser"),where("IdCourse","==",idCourse))
+            const getCourse = await getDocs(q);
+            setAll(getCourse.docs.length);
+        }
         const getRoadMap = async () => {
             const rm = [];
             const ac = [];
@@ -43,6 +57,7 @@ function DetailCertificate() {
             setActive(ac);
         }
         getRoadMap();
+        getCoureseUserAcp();
         return () => {
             unsub();
         }
@@ -53,7 +68,7 @@ function DetailCertificate() {
                 <div class="bg-slate-50 p-5 m-2 rounded-md flex justify-between items-center shadow">
                     <div>
                         <h3 class="font-bold">Số người đăng ký khóa học</h3>
-                        <p class="text-gray-500">100</p>
+                        <p class="text-gray-500">{all}</p>
                     </div>
                     <i class="fa-solid fa-users p-4 bg-gray-200 rounded-md"></i>
                 </div>
@@ -61,7 +76,7 @@ function DetailCertificate() {
                 <div class="bg-slate-50 p-5 m-2 flex justify-between items-center shadow">
                     <div>
                         <h3 class="font-bold">Số chứng chỉ đã cấp</h3>
-                        <p class="text-gray-500">65</p>
+                        <p class="text-gray-500">{acp}</p>
                     </div>
                     <i class="fa-solid fa-users p-4 bg-green-200 rounded-md"></i>
                 </div>
@@ -69,7 +84,7 @@ function DetailCertificate() {
                 <div class="bg-slate-50 p-5 m-2 flex justify-between items-center shadow">
                     <div>
                         <h3 class="font-bold">Số chứng chỉ chờ xét duyệt</h3>
-                        <p class="text-gray-500">30</p>
+                        <p class="text-gray-500">{nacp}</p>
                     </div>
                     <i class="fa-solid fa-users p-4 bg-yellow-200 rounded-md"></i>
                 </div>

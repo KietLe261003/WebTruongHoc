@@ -1,27 +1,103 @@
-import React, { useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import React, { useContext, useEffect, useState } from 'react';
+import { collection, doc, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 //Components
-import Pagination from './PaginationTable';
 import { Button } from 'flowbite-react';
-import { useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import UpdateAndRemoveCourse from './UpdateAndRemoveCourse';
+import { AuthContext } from '../../context/AuthContext';
 export default function DataTable(props) {
+  const {currentUser}=useContext(AuthContext);
   const [course, setCourse] = useState([]);
   const navigate = useNavigate();
+
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 5;
+  const lastIndex = currentPage * recordsPerPage;
+  const firstIndex = lastIndex - recordsPerPage;
+
+  // Sử dụng useState để giữ giá trị và cập nhật chúng
+  const [records, setRecords] = useState([]);
+  const [npage, setNPage] = useState(0);
+  //const [numbers, setNumbers] = useState([]);
+  const [checkAdmin,setCheckAdmin]=useState(true);
+  const getCourse = async () => {
+    const getUser = await getDoc(doc(db,"users",currentUser.uid));
+    if(getUser.exists())
+    {
+        let q= collection(db,"course");
+        if(getUser.data().role==="teacher")
+        {
+            q = query(collection(db,"course"),where("teacher","==",getUser.data().id));
+            setCheckAdmin(false);
+        }
+        const querySnapshot = await getDocs(q);
+        const data = [];
+        querySnapshot.forEach((doc) => {
+          const valu = doc.data();
+          data.push(valu);
+        });
+  
+        setRecords(data.slice(firstIndex, lastIndex));
+        setNPage(Math.ceil(data.length / recordsPerPage));
+        //setNumbers([...Array(npage + 1).keys()].slice(1));
+        setCourse(data);
+    }
+  }
   useEffect(() => {
     const fetch = async () => {
-      const querySnapshot = await getDocs(collection(db, "course"));
-      const data = [];
-      querySnapshot.forEach((doc) => {
-        const valu = doc.data();
-        data.push(valu);
-      });
-      setCourse(data);
+      const getUser = await getDoc(doc(db,"users",currentUser.uid));
+      if(getUser.exists())
+      {
+          let q= collection(db,"course");
+          if(getUser.data().role==="teacher")
+          {
+              setCheckAdmin(false);
+              q = query(collection(db,"course"),where("teacher","==",getUser.data().id));
+          }
+          const querySnapshot = await getDocs(q);
+          const data = [];
+          querySnapshot.forEach((doc) => {
+            const valu = doc.data();
+            data.push(valu);
+          });
+    
+          setRecords(data.slice(firstIndex, lastIndex));
+          setNPage(Math.ceil(data.length / recordsPerPage));
+          //setNumbers([...Array(npage + 1).keys()].slice(1));
+          setCourse(data);
+      }
     }
     fetch();
-  }, [])
+  }, [npage,firstIndex,lastIndex,currentUser])
+  const handlePre = () => {
+    setCurrentPage(currentPage - 1);
+  }
+  const handleNext = () => {
+    setCurrentPage(currentPage + 1);
+  }
+  const handleSearch = (txt) => {
+    if(txt==="")
+    {
+      setRecords(course.slice(firstIndex, lastIndex));
+      setNPage(Math.ceil(course.length / recordsPerPage));
+    }
+    else
+    setRecords(course.filter(item => item.nameCourse.includes(txt) || item.teacher.includes(txt) || item.id.includes(txt)));
+  }
+  const handlePublic = async (id,status)=>{
+      try {
+        const newStatus=!status;
+        await updateDoc(doc(db,"course",id),{
+          isPublic: newStatus
+        })
+        getCourse();
+      } catch (error) {
+          console.log("Lỗi nek: "+error);
+      }
+  }
   return (
     <section class="container px-4 mx-auto">
       <div class="sm:flex sm:items-center sm:justify-between">
@@ -82,7 +158,7 @@ export default function DataTable(props) {
             </svg>
           </span>
 
-          <input type="text" placeholder="Search" class="block w-full py-1.5 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40" />
+          <input type="text" onChange={(e) => { handleSearch(e.target.value) }} placeholder="Search" class="block w-full py-1.5 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40" />
         </div>
       </div>
 
@@ -110,14 +186,13 @@ export default function DataTable(props) {
                       Giáo viên
                     </th>
                     <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">Trang thái</th>
-                    <th scope="col" class="px-3 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">Thời gian</th>
                     <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">Loại</th>
                     <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400 flex justify-center">Active</th>
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
                   {
-                    course.map((item) => (
+                    records.map((item) => (
                       <tr>
                         <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
                           <div>
@@ -133,23 +208,27 @@ export default function DataTable(props) {
                           </div>
                         </td>
                         <td class="px-4 py-4 text-sm whitespace-nowrap">
-                          <div class="inline px-3 py-1 text-sm font-normal rounded-full text-emerald-500 gap-x-2 bg-emerald-100/60 dark:bg-gray-800">
-                            {item.isPublic===true ? "Công khai" : "Riêng tư"}
+                          <div class="inline px-3 py-1 text-sm font-normal rounded-full gap-x-2 dark:bg-gray-800">
+                            {
+                              item.isPublic === true ? 
+                                checkAdmin===true ?
+                                <Button className=' bg-yellow-400' onClick={() => { handlePublic(item.id,item.isPublic) }}>Ẩn khóa học</Button>:
+                                <Button className=' bg-green-500'>Công khai</Button>
+                              : 
+                                checkAdmin===true ?
+                                <Button className=' bg-green-500' onClick={() => { handlePublic(item.id,item.isPublic) }}>Công khai</Button> :
+                                <Button className=' bg-yellow-400'>Chờ duyệt</Button>
+                            }
                           </div>
                         </td>
                         <td class="px-4 py-4 text-sm whitespace-nowrap">
                           <div class="flex items-center ">
-                            {item.time}
-                          </div>
-                        </td>
-                        <td class="px-4 py-4 text-sm whitespace-nowrap">
-                          <div class="flex items-center ">
-                            {item.type==="1" ? "Trả phí" : "Miễn Phí"}
+                            {item.type === "1" ? "Trả phí" : "Miễn Phí"}
                           </div>
                         </td>
                         <td class="px-4 py-4 text-sm whitespace-nowrap">
                           <div style={{ display: "flex", flexDirection: "row" }}>
-                            <Button color="blue" onClick={()=>{navigate(`/Admin/ManagerCourse/Detail/${item.id}`);}}>Chi tiết</Button>
+                            <Button color="blue" onClick={() => { navigate(`/Admin/ManagerCourse/Detail/${item.id}`); }}>Chi tiết</Button>
                             <UpdateAndRemoveCourse course={item}></UpdateAndRemoveCourse>
                           </div>
                         </td>
@@ -162,7 +241,30 @@ export default function DataTable(props) {
           </div>
         </div>
       </div>
-      <Pagination />
+      <div class="mt-6 sm:flex sm:items-center sm:justify-between ">
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          Page <span class="font-medium text-gray-700 dark:text-gray-100">1 of 10</span>
+        </div>
+        <div class="flex items-center mt-4 gap-x-4 sm:mt-0">
+          <button onClick={handlePre} class="flex items-center justify-center w-1/2 px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md sm:w-auto gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 rtl:-scale-x-100">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
+            </svg>
+
+            <span>
+              previous
+            </span>
+          </button>
+          <button onClick={handleNext} class="flex items-center justify-center w-1/2 px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md sm:w-auto gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800">
+            <span>
+              Next
+            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 rtl:-scale-x-100">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </section>
   );
 }

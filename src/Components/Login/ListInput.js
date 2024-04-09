@@ -3,7 +3,7 @@ import InputItem from "./Inputitem";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth,db,storage } from "../../firebase.js";
 import {  ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import {collection, doc, getDocs, limit, orderBy, query, setDoc} from "firebase/firestore"; 
+import { doc, setDoc} from "firebase/firestore"; 
 import { useNavigate } from "react-router-dom";
 function ListInput() {
     const [err, setErr] = useState(false);
@@ -17,17 +17,7 @@ function ListInput() {
         const address = e.target[4].value;
         const file = e.target[5].files[0];
         try {
-              const q = query(collection(db, "users"), orderBy("userNumber", "desc"), limit(1));
-              const querySnapshot = await getDocs(q);
-              let id = 1;
-              let userNumber=1;
-              if (!querySnapshot.empty) {
-                const lastDoc = querySnapshot.docs[0];
-                const lastId = lastDoc.data().id;
-                id = parseInt(lastId.substring(2)) + 1;
-              }
-              userNumber=id;
-              id = "ND" + id;
+             
             const res = await createUserWithEmailAndPassword(auth, email, password);
             console.log(res);
             const date= Date.now();
@@ -43,7 +33,7 @@ function ListInput() {
                     //create user on firestore
                     await setDoc(doc(db, "users", res.user.uid), {
                       uid: res.user.uid,
-                      id: id,
+                      id: res.user.uid,
                       displayName,
                       email,
                       photoURL: downloadURL,
@@ -55,7 +45,6 @@ function ListInput() {
                       blog: [],
                       class: [],
                       role: "user",
-                      userNumber: userNumber
                     });
                     //create empty user chats on firestore
                     await setDoc(doc(db, "userChats", res.user.uid), {});

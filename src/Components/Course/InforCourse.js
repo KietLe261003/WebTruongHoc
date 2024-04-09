@@ -3,7 +3,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
-
+import Paymentbtn from './PaymentBtn';
 function InforCourse(props) {
     const { currentUser } = useContext(AuthContext);
     const course = props.course;
@@ -39,15 +39,21 @@ function InforCourse(props) {
             rm.forEach((it) => {
                 dt.push(it.data());
             })
-            const idActive = dt[0].id
-            navigate(`/learing/${idActive}/${course.id}`);
+            dt.sort((a,b)=> a.timeCreate-b.timeCreate);
+            if(dt.length<=0)
+            {
+                alert("Khóa học chưa có hoạt động");
+            }
+            else
+            {
+                const idActive = dt[0].id;
+                navigate(`/learing/${idActive}/${course.id}`);
+            }
         }
         else {
             
-
             const docSnap = await getDoc(doc(db, "users", currentUser.uid));
             const idUser = docSnap.data().id;
-
             const docListCourseUser = await getDocs(collection(db, "listCourseUser"));
             const sz = docListCourseUser.size + 1;
             const id = "" + sz;
@@ -55,7 +61,8 @@ function InforCourse(props) {
                 await setDoc(doc(db, "listCourseUser", id), {
                     id: id,
                     IdUser: idUser,
-                    IdCourse: course.id
+                    IdCourse: course.id,
+                    final: 0
                 });
                 const numberUser = course.userAplly===undefined ? 1 : course.userAplly+1;
                 await updateDoc(doc(db,"course",course.id),{
@@ -69,13 +76,18 @@ function InforCourse(props) {
             const q = query(collection(db, "active"), where("idRoadMap", "==", idRoadMap));
             const rm = await getDocs(q);
             await Promise.all(rm.docs.map(async (it) => {
-                dt.push(it.data());
-            
-                
+                dt.push(it.data());    
             }));
-            
-            const idActive = dt[0].id;
-            navigate(`/learing/${idActive}/${course.id}`);
+            dt.sort((a,b)=> a.timeCreate-b.timeCreate);
+            if(dt.length<=0)
+            {
+                alert("Khóa học chưa có hoạt động");
+            }
+            else
+            {
+                const idActive = dt[0].id;
+                navigate(`/learing/${idActive}/${course.id}`);
+            }
         }
     }
     const buttonApply = () => {
@@ -88,9 +100,22 @@ function InforCourse(props) {
             </button>
         }
         else {
-            return <button onClick={handleApply} class="dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 text-base flex items-center justify-center leading-none text-white bg-gray-800 w-full py-4 hover:bg-gray-700 focus:outline-none">
-                {course.priceCourse !== undefined ? price + " VNĐ" : "Đăng ký học"}
-            </button>
+            return <div>
+                {
+                    course.priceCourse!==0 ?
+                    <div>
+                        <button disabled class="dark:bg-white mb-3 dark:text-gray-900 dark:hover:bg-gray-100 focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 text-base flex items-center justify-center leading-none text-white bg-gray-800 w-full py-4 hover:bg-gray-700 focus:outline-none">
+                            {price + " VNĐ"}
+                        </button>
+                        <Paymentbtn course={course} idRoadMap={idRoadMap} price={price}></Paymentbtn>
+                    </div> :
+                    <div>
+                        <button onClick={handleApply} class="dark:bg-white mb-3 dark:text-gray-900 dark:hover:bg-gray-100 focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 text-base flex items-center justify-center leading-none text-white bg-gray-800 w-full py-4 hover:bg-gray-700 focus:outline-none">
+                            Đăng ký học
+                        </button>
+                    </div> 
+                }
+            </div>
         }
 
     }

@@ -15,7 +15,6 @@ function ManagerUser() {
                 return (
                     <div style={{display: "flex", flexDirection: "row"}}>
                         <Button color="blue">Chi tiết</Button>
-                        <Button color="warning">Sửa</Button>
                         <Button color="failure">Xóa</Button>
                     </div>
                 );

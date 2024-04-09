@@ -46,7 +46,24 @@ function RoadMap(props) {
         if (choice) {
             const q = doc(db, "active", id);
             const getActive=await getDoc(q);
-            
+            const qd = query(collection(db, "detailActive"), where("IdActive", "==", id));
+                    const deleteDetail = await getDocs(qd);
+
+                    // Tạo một mảng promises cho việc xóa chi tiết active
+                    const deleteDetailPromises = deleteDetail.docs.map(async (item) => {
+                        if(item.exists())
+                        {
+                            const idD=item.data().id+"";
+                            try {
+                                await deleteDoc(doc(db, "detailActive", idD));
+                            } catch (error) {
+                                alert("Lỗi xóa detail");
+                                console.log(error);
+                            }
+                            
+                        }
+                    });
+                    await Promise.all(deleteDetailPromises);
             await deleteDoc(q);
             if(getActive.data().type===1)
             {

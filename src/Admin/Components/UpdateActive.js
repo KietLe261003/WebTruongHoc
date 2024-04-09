@@ -4,6 +4,9 @@ import { db, storage } from "../../firebase";
 import Modal from 'react-modal';
 import { Button } from "flowbite-react";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import UpdateActiveCode from "./UpdateActiveCode";
+import UpdateActiveDoc from "./UpdateActiveDoc";
+import UpdateActiveQuiz from "./UpdateActiveQuiz";
 const customStyles = {
     content: {
         top: '50%',
@@ -132,6 +135,7 @@ function UpdateActive(props) {
                     </div>
                 </div>
                 <div style={{ padding: "20px" }}>
+                    <span>{activeUpdate.id}</span>
                     {
                         activeUpdate.type===1 ?
                         <form onSubmit={handleSubmit}>
@@ -161,6 +165,7 @@ function UpdateActive(props) {
                                 <div class="md:col-span-2">
                                     <input type="file" class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none bg-slate-400" />
                                 </div>
+                                
                                 <div class="md:col-span-2">
                                     <button
                                         type="submit"
@@ -168,7 +173,8 @@ function UpdateActive(props) {
                                 </div>
                             </div>
                         </form>
-                        :
+                        : 
+                        activeUpdate.type===2 ?
                         <form onSubmit={handleSubmit}>
                                 <div class="grid md:grid-cols-2 grid-cols-1 gap-6">
                                     <div class="md:col-span-2 w-full">
@@ -235,7 +241,12 @@ function UpdateActive(props) {
                                             class="py-3 text-base font-medium rounded text-white bg-blue-800 w-full hover:bg-blue-700 transition duration-300">Tạo </button>
                                     </div>
                                 </div>
-                            </form>
+                            </form>:
+                            activeUpdate.type===3 ?
+                            <UpdateActiveCode activeUpdate={activeUpdate}></UpdateActiveCode> :
+                            activeUpdate.type===4 ?
+                            <UpdateActiveDoc activeUpdate={activeUpdate} idCourse={IdCourse}></UpdateActiveDoc> :
+                            <UpdateActiveQuiz activeUpdate={activeUpdate}></UpdateActiveQuiz>
                     }
                 </div>
             </Modal>

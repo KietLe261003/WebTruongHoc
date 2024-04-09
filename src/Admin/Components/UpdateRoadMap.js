@@ -52,7 +52,7 @@ function UpdateRoadMap(props) {
     }
     const handleDelete = async () => {
         const choice = window.confirm(
-            "Bạn có chắc muốn xóa hoạt động này không"
+            "Bạn có chắc muốn xóa chương này không"
         )
         if (choice) {
             const q = query(collection(db, "active"), where("idRoadMap", "==", IdroadMap));
@@ -67,7 +67,24 @@ function UpdateRoadMap(props) {
 
                 const desertRef = ref(storage, `Video/${IdCourse}/${IdroadMap}/${active.id}`);
                 const deleteFilePromise = deleteObject(desertRef);
+                const qd = query(collection(db, "detailActive"), where("IdActive", "==", active.id));
+                const deleteDetail = await getDocs(qd);
 
+                // Tạo một mảng promises cho việc xóa chi tiết active
+                const deleteDetailPromises = deleteDetail.docs.map(async (item) => {
+                    if(item.exists())
+                    {
+                        const idD=item.data().id+"";
+                        try {
+                            await deleteDoc(doc(db, "detailActive", idD));
+                        } catch (error) {
+                            alert("Lỗi xóa detail");
+                            console.log(error);
+                        }
+                        
+                    }
+                });
+                await Promise.all(deleteDetailPromises);
                 deletePromises.push(deleteActivePromise, deleteFilePromise);
             });
 

@@ -8,6 +8,9 @@ import { red } from "@mui/material/colors";
 import { AuthContext } from "../../context/AuthContext";
 import moment from 'moment';
 import LearingType2 from "./LearingType2";
+import LearingType3 from "./LearingType3";
+import LearingType4 from "./LearingType4";
+import LearingType5 from "./LearingType5";
 function Learing() {
     const { currentUser } = useContext(AuthContext);
     const { idActive, idcourse } = useParams();
@@ -56,7 +59,7 @@ function Learing() {
             const docSnap = await getDoc(doc(db, "active", idActive));
             if (docSnap.exists) {
                 setActive(docSnap.data());
-                console.log(docSnap.data().timeUpdate);
+                //console.log(docSnap.data().timeUpdate);
             }
             else
                 setErr(true);
@@ -94,7 +97,7 @@ function Learing() {
             rm.forEach((it) => {
                 loadSumActive(it.IdRoadMap);
             })
-            
+
             setActiveAll(ac);
             setRoadMap(rm);
         }
@@ -110,22 +113,42 @@ function Learing() {
         const docSnap = await getDocs(q);
         setSumActive((prevSumActive) => prevSumActive + docSnap.size);
     }
+    const updateFinal = async (idUser, currentActive) => {
+        const ref = collection(db, "listCourseUser");
+        const q1 = query(ref, where("IdUser", "==", idUser), where("IdCourse", "==", course.id));
+        const docCheck = await getDocs(q1);
+        if (!docCheck.empty) {
+            const fl = (currentActive + 1) / activeAll.length * 100;
+            try {
+                await updateDoc(doc(db, "listCourseUser", docCheck.docs[0].data().id), {
+                    final: fl
+                })
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        else {
+            console.log(false);
+        }
+    }
+    //Khi kết thúc video
     const handleEndVideo = async () => {
         const currentActive = activeAll.findIndex(ob => ob.id === idActive);
         let nextActive = -1;
-            if (currentActive !== -1)
-                nextActive = currentActive === activeAll.length - 1 ? activeAll[currentActive] : activeAll[currentActive + 1];
-            else {
-                window.location.reload();
-            }
+        if (currentActive !== -1)
+            nextActive = currentActive === activeAll.length - 1 ? activeAll[currentActive] : activeAll[currentActive + 1];
+        else {
+            window.location.reload();
+        }
 
         const docUser = await getDoc(doc(db, "users", currentUser.uid));
         const idUser = docUser.data().id;
         const q = query(collection(db, "detailActive"), where("IdActive", "==", idActive), where("IdUser", "==", idUser));
         const docCheck = await getDocs(q);
+        //Kiểm tra xem người dùng đã có trong bảng deailActive hay chưa nếu chưa thì thêm vào còn nếu có rồi thì chuyển trạng thái bằng true
         if (docCheck.empty) {
             let id = 1;
-            const q = query(collection(db, "detailActive"), orderBy("id", "desc"), limit(1));
+            const q = query(collection(db, "detailActive"), orderBy("timeUpdate", "desc"), limit(1));
             const querySnapshot = await getDocs(q);
             if (!querySnapshot.empty) {
                 const lastDoc = querySnapshot.docs[0];
@@ -133,17 +156,19 @@ function Learing() {
                 id = lastId + 1;
             }
             //id = "" + id;
-            let id1=""+id;
+            let id1 = "" + id;
             try {
+                const time = Timestamp.now();
                 await setDoc(doc(db, "detailActive", id1), {
                     id: id,
                     IdUser: idUser,
                     IdActive: idActive,
                     pass: true,
-                    notes: []
+                    notes: [],
+                    timeUpdate: time
                 });
-                if(currentActive===activeAll.length-1)
-                {
+                updateFinal(idUser, currentActive);
+                if (currentActive === activeAll.length - 1) {
                     const timeComple = Timestamp.now();
                     await updateDoc(doc(db, "users", currentUser.uid), {
                         courseComplete: arrayUnion({ idcourse: idcourse, time: timeComple })
@@ -152,6 +177,7 @@ function Learing() {
                 setSuccess(true);
                 const timeoutId = setTimeout(() => {
                     setSuccess(false);
+                    //Kiểm tra xem người dùng đã end khóa học hay chưa
                     if (currentActive === activeAll.length - 1) {
                         navigate(`/Course/CompleCourse/${idcourse}`);
                     }
@@ -168,16 +194,18 @@ function Learing() {
         else {
             const idDetail = docCheck.docs[0].data().id;
             if (docCheck.docs[0].data().pass === false) {
+                const time = Timestamp.now();
                 await updateDoc(doc(db, "detailActive", idDetail), {
+                    timeUpdate: time,
                     pass: true
                 });
-                if(currentActive===activeAll.length-1)
-                {
+                if (currentActive === activeAll.length - 1) {
                     const timeComple = Timestamp.now();
                     await updateDoc(doc(db, "users", currentUser.uid), {
                         courseComplete: arrayUnion({ idcourse: idcourse, time: timeComple })
                     });
                 }
+                updateFinal(idUser, currentActive);
                 setSuccess(true);
                 const timeoutId = setTimeout(() => {
                     setSuccess(false);
@@ -193,9 +221,14 @@ function Learing() {
             }
         }
     }
+    //Kết thúc video
+
     const handleCloseSuccess = () => {
         setSuccess(false);
     }
+
+
+    /*Kiểm tra thời gian tua của người dùng  */
     const [currentTime, setCurrentTime] = useState("");
     const [countSeek, setCountSeek] = useState(0);
     const [timeStartSeek, setTimeStartSeek] = useState("");
@@ -241,6 +274,7 @@ function Learing() {
         }
         setTime(videoRef.current.currentTime);
     };
+    /*Kiểm tra thời gian tua của người dùng  */
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
     const toggleDrawer = () => {
@@ -253,57 +287,67 @@ function Learing() {
     const [note, setNote] = useState("");
     const handleNote = async (e) => {
         e.preventDefault();
-        const docUser = await getDoc(doc(db, "users", currentUser.uid));
-        const idUser = docUser.data().id;
-        const q = query(collection(db, "detailActive"), where("IdActive", "==", idActive), where("IdUser", "==", idUser));
-        const docCheck = await getDocs(q);
-        const time = videoRef.current.currentTime;
-        let timeNote = Math.floor(time / 60) < 10 ? "0" + Math.floor(time / 60) : "" + Math.floor(time / 60);
-        timeNote = timeNote + ":" + (Math.floor(time % 60) < 10 ? "0" + Math.floor(time % 60) : "" + Math.floor(time % 60));
-        if (docCheck.empty) {
-            let id = 1;
-            const q = query(collection(db, "detailActive"), orderBy("id", "desc"), limit(1));
-            const querySnapshot = await getDocs(q);
-            if (!querySnapshot.empty) {
-                const lastDoc = querySnapshot.docs[0];
-                const lastId = lastDoc.data().id;
-                id = parseInt(lastId.substring(0)) + 1;
+        try {
+            const docUser = await getDoc(doc(db, "users", currentUser.uid));
+            const idUser = docUser.data().id;
+            const q = query(collection(db, "detailActive"), where("IdActive", "==", idActive), where("IdUser", "==", idUser));
+            const docCheck = await getDocs(q);
+            const time = videoRef.current.currentTime;
+            let timeNote = Math.floor(time / 60) < 10 ? "0" + Math.floor(time / 60) : "" + Math.floor(time / 60);
+            timeNote = timeNote + ":" + (Math.floor(time % 60) < 10 ? "0" + Math.floor(time % 60) : "" + Math.floor(time % 60));
+            //toggleDrawer();
+            if (docCheck.empty) {
+                let id = 1;
+                const q = query(collection(db, "detailActive"), orderBy("id", "desc"), limit(1));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    const lastDoc = querySnapshot.docs[0];
+                    const lastId = lastDoc.data().id;
+                    id = parseInt(lastId) + 1;
+                }
+                id = "" + id;
+                try {
+                    await setDoc(doc(db, "detailActive", id), {
+                        id: id,
+                        IdUser: idUser,
+                        IdActive: idActive,
+                        pass: false,
+                        notes: [{ note: note, timeNote: timeNote }]
+                    });
+                    alert("Thêm thành công");
+                    setNote("");
+                    toggleDrawer();
+                } catch (error) {
+                    console.log(error);
+                }
             }
-            id = "" + id;
-            try {
-                await setDoc(doc(db, "detailActive", id), {
-                    id: id,
-                    IdUser: idUser,
-                    IdActive: idActive,
-                    pass: false,
-                    notes: [{ note: note, timeNote: timeNote }]
+            else {
+                //console.log("Đmqt");
+                const idDetail = docCheck.docs[0].data().id;
+               // console.log(idDetail);
+                await updateDoc(doc(db, "detailActive", idDetail), {
+                    notes: arrayUnion({
+                        note: note, timeNote: timeNote
+                    })
                 });
                 alert("Thêm thành công");
                 setNote("");
                 toggleDrawer();
-            } catch (error) {
-                console.log(error);
             }
+        } catch (error) {
+            console.log(error)
         }
-        else {
-            const idDetail = docCheck.docs[0].data().id;
-            await updateDoc(doc(db, "detailActive", idDetail), {
-                notes: arrayUnion({
-                    note: note, timeNote: timeNote
-                })
-            });
-            alert("Thêm thành công");
-            setNote("");
-            toggleDrawer();
-        }
+
     }
     return (
+        activeAll.length>0 &&
         <div class="h-full">
             {roadMap && course && <Header idActive={idActive} nameCourse={course.nameCourse} indexActive={indexActive} sumActive={sumActive}></Header>}
             {err && <h1 style={{ color: red }}>Course not found</h1>}
             <div class="flex flex-row h-96">
                 {
-                    active && active.type === 1 ?
+                    active &&
+                        active.type === 1 ?
                         <div style={{ flex: 0.70, backgroundColor: "black", height: 600, paddingLeft: 100, paddingRight: 100 }}>
                             <video
                                 ref={videoRef}
@@ -371,7 +415,15 @@ function Learing() {
                                     </div>
                                 </div>
                             </div>
-                        </div> : <LearingType2 active={active} activeAll={activeAll} idcourse={idcourse} />}
+                        </div> :
+                        active && active.type === 2 ?
+                            <LearingType2 active={active} activeAll={activeAll} idcourse={idcourse} /> :
+                        active.type ===3 ?
+                            <LearingType3 active={active} activeAll={activeAll} idcourse={idcourse}/> :
+                        active.type ===4 ?
+                            <LearingType4 active={active} activeAll={activeAll} idcourse={idcourse}/> :
+                            <LearingType5 active={active} activeAll={activeAll} idcourse={idcourse}/>
+                }
                 <div style={{ flex: 0.30 }}>
                     {
                         roadMap &&

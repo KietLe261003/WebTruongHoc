@@ -1,47 +1,67 @@
-import React, { useEffect, useState } from 'react';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import React, { useContext, useEffect, useState } from 'react';
+import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 //Components
-import Pagination from './PaginationTable';
 import { Button } from 'flowbite-react';
-import { useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../context/AuthContext';
 export default function DataTable(props) {
   const [course, setCourse] = useState([]);
-  const [allCourse,setAllCourse]=useState([]);
+  const {currentUser}=useContext(AuthContext);
+  //const [allCourse, setAllCourse] = useState([]);
   const navigate = useNavigate();
+
+
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 5;
+  const lastIndex = currentPage * recordsPerPage;
+  const firstIndex = lastIndex - recordsPerPage;
+
+  // Sử dụng useState để giữ giá trị và cập nhật chúng
+  const [records, setRecords] = useState([]);
+  const [npage, setNPage] = useState(0);
+  //const [numbers, setNumbers] = useState([]);
+
   useEffect(() => {
     const fetch = async () => {
-        try {
-          const querySnapshot = await getDocs(collection(db, "course"));
-      
-          // Using map to create an array of promises
-          const promises = querySnapshot.docs.map(async (doc1) => {
-            let valu = doc1.data();
-             const getCertificate = await getDoc(doc(db, "certificate", valu.id));
-      
-            // // If the certificate exists, update the numberCertificate property
-            if (getCertificate.exists()) {
-              valu.numberCertificate = getCertificate.data().users;
-            }
-      
-            return valu;
-          });
-      
-          // Wait for all promises to resolve
-          const results = await Promise.all(promises);
-      
-          // Now you can safely set the state
-          setCourse(results);
-          setAllCourse(results);
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        }
-      };
+      const getUser = await getDoc(doc(db,"users",currentUser.uid));
+      if(getUser.exists())
+      {
+        let q= collection(db,"course");
+          if(getUser.data().role==="teacher")
+          {
+              q = query(collection(db,"course"),where("teacher","==",getUser.data().id));
+          }
+        const querySnapshot = await getDocs(q);
+        const data = [];
+        querySnapshot.forEach((doc) => {
+          const valu = doc.data();
+          data.push(valu);
+        });
+  
+        setRecords(data.slice(firstIndex, lastIndex));
+        setNPage(Math.ceil(data.length / recordsPerPage));
+        //setNumbers([...Array(npage + 1).keys()].slice(1));
+        setCourse(data);
+      }
+    }
     fetch();
-  }, [])
-  const handleSearch= (txt)=>{
-    setCourse(allCourse.filter(item => item.nameCourse.includes(txt) || item.teacher.includes(txt) || item.id.includes(txt)));
+  }, [npage, firstIndex, lastIndex, currentUser])
+  const handlePre = () => {
+    setCurrentPage(currentPage - 1);
+  }
+  const handleNext = () => {
+    setCurrentPage(currentPage + 1);
+  }
+  const handleSearch = (txt) => {
+    if (txt === "") {
+      setRecords(course.slice(firstIndex, lastIndex));
+      setNPage(Math.ceil(course.length / recordsPerPage));
+    }
+    else
+      setRecords(course.filter(item => item.nameCourse.includes(txt) || item.teacher.includes(txt) || item.id.includes(txt)));
   }
   return (
     <section class="container px-4 mx-auto">
@@ -103,7 +123,7 @@ export default function DataTable(props) {
             </svg>
           </span>
 
-          <input type="text" placeholder="Search" onChange={(e)=>{handleSearch(e.target.value)}} class="block w-full py-1.5 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40" />
+          <input type="text" placeholder="Search" onChange={(e) => { handleSearch(e.target.value) }} class="block w-full py-1.5 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40" />
         </div>
       </div>
 
@@ -137,7 +157,7 @@ export default function DataTable(props) {
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
                   {
-                    course.map((item) => (
+                    records.map((item) => (
                       <tr>
                         <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
                           <div>
@@ -154,17 +174,17 @@ export default function DataTable(props) {
                         </td>
                         <td class="px-4 py-4 text-sm whitespace-nowrap">
                           <div class="flex items-center">
-                            {item.numberCertificate !== undefined ? item.numberCertificate.length : 0}
+                            {item.numberCertificate !== undefined ? item.numberCertificate : 0}
                           </div>
                         </td>
                         <td class="px-4 py-4 text-sm whitespace-nowrap">
                           <div class="flex items-center ">
-                            {item.type==="1" ? "Trả phí" : "Miễn Phí"}
+                            {item.type === "1" ? "Trả phí" : "Miễn Phí"}
                           </div>
                         </td>
                         <td class="px-4 py-4 text-sm whitespace-nowrap">
-                          <div style={{ display: "flex", flexDirection: "row" , justifyContent: 'center'}}>
-                            <Button color="blue" onClick={()=>{navigate(`/Admin/ManagerCertificate/Detail/${item.id}`);}}>Chi tiết</Button>
+                          <div style={{ display: "flex", flexDirection: "row", justifyContent: 'center' }}>
+                            <Button color="blue" onClick={() => { navigate(`/Admin/ManagerCertificate/Detail/${item.id}`); }}>Chi tiết</Button>
                           </div>
                         </td>
                       </tr>
@@ -176,7 +196,30 @@ export default function DataTable(props) {
           </div>
         </div>
       </div>
-      <Pagination />
+      <div class="mt-6 sm:flex sm:items-center sm:justify-between ">
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          Page <span class="font-medium text-gray-700 dark:text-gray-100">1 of 10</span>
+        </div>
+        <div class="flex items-center mt-4 gap-x-4 sm:mt-0">
+          <button onClick={handlePre} class="flex items-center justify-center w-1/2 px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md sm:w-auto gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 rtl:-scale-x-100">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
+            </svg>
+
+            <span>
+              previous
+            </span>
+          </button>
+          <button onClick={handleNext} class="flex items-center justify-center w-1/2 px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md sm:w-auto gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800">
+            <span>
+              Next
+            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 rtl:-scale-x-100">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </section>
   );
 }
