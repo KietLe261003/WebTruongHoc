@@ -1,10 +1,11 @@
 import { Editor } from "@monaco-editor/react";
 import { Button, Input, Select } from "antd";
-import { Timestamp, arrayUnion, collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { Timestamp, arrayUnion, collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
+import { v4 as uuid } from "uuid";
 const languProgram = [
     {
         label: "cpp",
@@ -167,18 +168,10 @@ function LearingType3(props) {
         const docCheck = await getDocs(q);
         //Kiểm tra xem người dùng đã có trong bảng deailActive hay chưa nếu chưa thì thêm vào còn nếu có rồi thì chuyển trạng thái bằng true
         if (docCheck.empty) {
-            let id = 1;
-            const q = query(collection(db, "detailActive"), orderBy("timeUpdate", "desc"), limit(1));
-            const querySnapshot = await getDocs(q);
-            if (!querySnapshot.empty) {
-                const lastDoc = querySnapshot.docs[0];
-                const lastId = lastDoc.data().id;
-                id = parseInt(lastId) + 1;
-            }
-            let id1 = ""+id;
+            let id = uuid();
             try {   
                 const timecp= Timestamp.now();
-                await setDoc(doc(db, "detailActive", id1), {
+                await setDoc(doc(db, "detailActive", id), {
                     id: id,
                     IdUser: idUser,
                     IdActive: active.id,

@@ -57,12 +57,14 @@ function CreateCourse() {
                             priceCourse: priceCourse,
                             sumActive: 0,
                             rating: 0,
+                            comment: [],
                         })
                         await setDoc(doc(db,"certificate",id),{
                             id: id,
                             users: []
                         })
                         setIsOpen(false);
+                        window.location.reload();
                     } catch (error) {
                         setErr(true);
                     }

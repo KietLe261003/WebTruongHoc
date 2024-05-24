@@ -35,6 +35,8 @@ function CreateActive(props) {
     function closeModal() {
         setIsOpen(false);
     }
+    // Khai báo state để lưu trữ tiến trình tải lên
+    const [uploadProgress, setUploadProgress] = useState(0);
     const handleSubmit = async (e) => {
         e.preventDefault();
         let id = uuid(); // hoặc giá trị ban đầu mong muốn
@@ -43,8 +45,24 @@ function CreateActive(props) {
             const video = e.target[1].files[0];
             const storageRef = ref(storage, `Video/${IdCourse + "/" + IdRoadMap + "/" + id}`);
             const timeUpdate = Timestamp.now();
-            await uploadBytesResumable(storageRef, video).then(() => {
-                getDownloadURL(storageRef).then(async (downloadURL) => {
+            
+            
+    
+            const uploadTask = uploadBytesResumable(storageRef, video);
+    
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    // Tính toán phần trăm tải lên và cập nhật tiến trình
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    setUploadProgress(progress);
+                },
+                (error) => {
+                    // Xử lý lỗi nếu có
+                    console.error(error);
+                },
+                async () => {
+                    // Khi tải lên hoàn tất, lấy đường dẫn tải xuống và thực hiện các thao tác khác
+                    const downloadURL = await getDownloadURL(storageRef);
                     try {
                         await setDoc(doc(db, "active", id), {
                             id: id,
@@ -67,8 +85,8 @@ function CreateActive(props) {
                         console.log(error);
                         alert("Lỗi trong quá trình xử lý");
                     }
-                })
-            })
+                }
+            );
         }
         else {
             const nameActive = e.target[0].value;
@@ -163,6 +181,9 @@ function CreateActive(props) {
                 {
                     openTab === 1 ?
                         <div style={{ padding: "20px" }}>
+                             {uploadProgress > 0 && 
+                                <p>Đang tải {uploadProgress}</p>
+                             }
                             <form onSubmit={handleSubmit}>
                                 <div class="grid md:grid-cols-2 grid-cols-1 gap-6">
                                     <div class="md:col-span-2 w-full">

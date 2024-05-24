@@ -101,7 +101,7 @@ function Contact(props) {
                     <MDBCol sm="9">
                         {
                             setting===true ?
-                            <Input type="text" className="text-muted w-full" value={address} onChange={(e)=>{setAddress(e.target.value)}}></Input>:
+                            <Input type="text" className="text-muted w-full" disabled value={user.role}></Input>:
                             <MDBCardText className="text-muted">{user.role!==undefined && user.role}</MDBCardText>
                         }
                     </MDBCol>

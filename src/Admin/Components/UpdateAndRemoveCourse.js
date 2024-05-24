@@ -36,20 +36,13 @@ function UpdateAndRemoveCourse(props) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         let nameCourse = e.target[0].value;
-        let teacher = e.target[1].value;
-        let types = e.target[2].value;
-        const photoURL = e.target[3].files[0];
-        let description = e.target[4].value;
+        const photoURL = e.target[1].files[0];
+        let description = e.target[2].value;
 
         if (nameCourse === "") {
             nameCourse = course.nameCourse;
         }
-        if (teacher === "") {
-            teacher = course.teacher;
-        }
-        if (types === "") {
-            types = course.type;
-        }
+
         if (description === "") {
             description = course.description;
         }
@@ -64,8 +57,6 @@ function UpdateAndRemoveCourse(props) {
                         try {
                             await updateDoc(doc(db, "course", course.id), {
                                 nameCourse: nameCourse,
-                                teacher: teacher,
-                                type: types,
                                 photoURL: dowloadURL,
                                 description: description,
                                 timeUpdate: timeUpdate
@@ -86,8 +77,6 @@ function UpdateAndRemoveCourse(props) {
             try {
                 await updateDoc(doc(db, "course", course.id), {
                     nameCourse: nameCourse,
-                    teacher: teacher,
-                    type: types,
                     description: description,
                     timeUpdate: timeUpdate
                 })
@@ -204,9 +193,9 @@ function UpdateAndRemoveCourse(props) {
                                         <label for="subject" class="float-left block  font-normal text-gray-400 text-lg">Loại khóa học:</label>
                                         <select id="subject" name="subject"
                                             class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-700"
-                                            defaultValue={course.type === "1" ? "Trả phí" : "Miễn phí"} disabled>
-                                            <option value={"1"}>Trả phí </option>
-                                            <option value={"0"}>Miễn phí</option>
+                                            defaultValue={course.type === "0" ? "Trả phí" : "Miễn phí"} disabled>
+                                             <option value={"1"}>{course.type === "1" ? "Trả phí" : "Miễn phí"} </option>
+
                                         </select>
                                     </div>
                                     <div class="md:col-span-2" style={{ width: 300 }}>
@@ -228,18 +217,6 @@ function UpdateAndRemoveCourse(props) {
                                         <input type="text" id="fname" name="fname" placeholder="Tên khóa học"
                                             class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-700 "
                                         />
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <input type="text" id="email" name="teacher" placeholder="Giáo viên dạy"
-                                            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-700" />
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <label for="subject" class="float-left block  font-normal text-gray-400 text-lg">Loại khóa học:</label>
-                                        <select id="subject" name="subject" class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-700">
-                                            <option value="Option-1"></option>
-                                            <option value="1">Trả phí</option>
-                                            <option value="0">Miễn phí</option>
-                                        </select>
                                     </div>
                                     <div class="md:col-span-2">
                                         <label for="subject" class="float-left block  font-normal text-gray-400 text-lg">Chọn hình ảnh của khóa học:</label>

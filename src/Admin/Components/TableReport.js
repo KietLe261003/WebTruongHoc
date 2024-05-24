@@ -54,7 +54,7 @@ export default function TableReport(props) {
         });
         setReport(data);
 
-        const data1=data.filter(item => item.type===1 || item.type===2);
+        const data1=data.filter(item => item.type===1);
         setRecords(data1.slice(firstIndex, lastIndex));
         setNPage(Math.ceil(data1.length / recordsPerPage));
         //setNumbers([...Array(npage + 1).keys()].slice(1));
@@ -87,7 +87,7 @@ export default function TableReport(props) {
         data.push(valu);
       });
       setReport(data);
-      const data1=data.filter(item => item.type===1 || item.type===2);
+      const data1=data.filter(item => item.type===1);
       setRecords(data1.slice(firstIndex, lastIndex));
       setNPage(Math.ceil(data1.length / recordsPerPage));
       //setNumbers([...Array(npage + 1).keys()].slice(1));
@@ -103,8 +103,10 @@ export default function TableReport(props) {
   const [checkBtn,setCheckBtn]=useState(0);
   const handleFilter = (e) =>{
     if(e===0)
-    setRecords(report.filter(item => item.type===1 || item.type===2));
+    setRecords(report.filter(item => item.type===1));
     else if(e===1)
+    setRecords(report.filter(item => item.type===2));
+    else
     setRecords(report.filter(item => item.type===3));
 
     setCheckBtn(e);
@@ -150,10 +152,12 @@ export default function TableReport(props) {
       <div class="mt-6 md:flex md:items-center md:justify-between">
         <div class="inline-flex overflow-hidden bg-white border divide-x rounded-lg dark:bg-gray-900 rtl:flex-row-reverse dark:border-gray-700 dark:divide-gray-700">
           <button onClick={()=>{handleFilter(0)}} class={checkBtn===0 ? btnCheck.check : btnCheck.unCheck}>
-            Báo cáo
+            Báo cáo bài viết
           </button>
-
           <button onClick={()=>{handleFilter(1)}} class={checkBtn===1 ? btnCheck.check : btnCheck.unCheck}>
+            Báo cáo người dùng
+          </button>
+          <button onClick={()=>{handleFilter(2)}} class={checkBtn===2 ? btnCheck.check : btnCheck.unCheck}>
             Yêu cầu
           </button>
         </div>
@@ -219,7 +223,7 @@ export default function TableReport(props) {
                         <td class="px-4 py-4 text-sm whitespace-nowrap">
                           <div class="flex items-center ">
                             {item.type === 1 ? "Báo cáo bài viết" :
-                              item.type === 2 ? "Báo cáo bình luận bài viết" : "Cấp quyền giáo viên"}
+                              item.type === 2 ? "Báo cáo người dùng" : "Cấp quyền giáo viên"}
                           </div>
                         </td>
                         <td class="px-4 py-4 text-sm whitespace-nowrap">

@@ -62,32 +62,35 @@ function UpdateRoadMap(props) {
 
             getActive.forEach(async (it) => {
                 const active = it.data();
-
+            
                 const deleteActivePromise = deleteDoc(doc(db, "active", active.id));
-
-                const desertRef = ref(storage, `Video/${IdCourse}/${IdroadMap}/${active.id}`);
-                const deleteFilePromise = deleteObject(desertRef);
+            
+                // Kiểm tra nếu active.type === 1 thì mới xóa tệp
+                if (active.type === 1) {
+                    const desertRef = ref(storage, `Video/${IdCourse}/${IdroadMap}/${active.id}`);
+                    const deleteFilePromise = deleteObject(desertRef);
+                    deletePromises.push(deleteFilePromise);
+                }
+            
                 const qd = query(collection(db, "detailActive"), where("IdActive", "==", active.id));
                 const deleteDetail = await getDocs(qd);
-
+            
                 // Tạo một mảng promises cho việc xóa chi tiết active
                 const deleteDetailPromises = deleteDetail.docs.map(async (item) => {
-                    if(item.exists())
-                    {
-                        const idD=item.data().id+"";
+                    if (item.exists()) {
+                        const idD = item.data().id + "";
                         try {
                             await deleteDoc(doc(db, "detailActive", idD));
                         } catch (error) {
                             alert("Lỗi xóa detail");
                             console.log(error);
                         }
-                        
                     }
                 });
                 await Promise.all(deleteDetailPromises);
-                deletePromises.push(deleteActivePromise, deleteFilePromise);
+            
+                deletePromises.push(deleteActivePromise);
             });
-
             try {
                 await Promise.all(deletePromises);
                 await deleteDoc(doc(db, "courseRoadMap", IdroadMap));

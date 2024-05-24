@@ -1,8 +1,8 @@
 
 const Image = [
-    "https://tse4.mm.bing.net/th?id=OIP.w9lWgKW9YrcESnwZ7BoxuwHaEo&pid=Api&P=0&h=180",
-    "https://tse2.mm.bing.net/th?id=OIP.xOhm_SgVrO2YOthVD6JFqgHaEo&pid=Api&P=0&h=180",
-    "https://tse4.mm.bing.net/th?id=OIP.ehPjbhST6odGE0LSVeEv9QHaEo&pid=Api&P=0&h=180"
+    "https://laptrinhcuocsong.com/images/lap-trinh-vien.png",
+    "https://resources.mindx.edu.vn/uploads/images/ngon-ngu-lap-trinh-plc-9.jpg",
+    "https://tuhoclaptrinh.edu.vn/upload/post/15/89/77/nhung-kien-thuc-co-ban-ve-lap-trinh-20200520143854-315193.jpg"
 ]
 
 export default Image;

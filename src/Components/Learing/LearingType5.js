@@ -1,6 +1,6 @@
 import React from "react";
 import './learing.css';
-import { Timestamp, arrayUnion, collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { Timestamp, arrayUnion, collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { db } from "../../firebase";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useEffect } from "react";
 import Modal from 'react-modal';
+import { v4 as uuid } from "uuid";
 const customStyles = {
     content: {
         top: '50%',
@@ -19,6 +20,7 @@ const customStyles = {
         padding: '0px'
     },
 };
+
 function LearingType5(props) {
     const { currentUser } = useContext(AuthContext);
     const active = props.active;
@@ -80,19 +82,10 @@ function LearingType5(props) {
         const docCheck = await getDocs(q);
         //Kiểm tra xem người dùng đã có trong bảng deailActive hay chưa nếu chưa thì thêm vào còn nếu có rồi thì chuyển trạng thái bằng true
         if (docCheck.empty) {
-            let id = 1;
-            const q = query(collection(db, "detailActive"), orderBy("timeUpdate", "desc"), limit(1));
-            const querySnapshot = await getDocs(q);
-            if (!querySnapshot.empty) {
-                const lastDoc = querySnapshot.docs[0];
-                const lastId = lastDoc.data().id;
-                id = lastId + 1;
-            }
-            //id = "" + id;
-            let id1 = "" + id;
+            let id = uuid();
             try {
                 const time = Timestamp.now();
-                await setDoc(doc(db, "detailActive", id1), {
+                await setDoc(doc(db, "detailActive", id), {
                     id: id,
                     IdUser: idUser,
                     IdActive: active.id,
@@ -172,8 +165,15 @@ function LearingType5(props) {
         setPoint(sumPoint);
         setIsOpen(true);
     }
+    const [checkAns,setCheckAns]=useState(false);
+    const closeAns=()=>{
+        setCheckAns(false);
+    }
     return (
         <div style={{ flex: 0.70, height: 600 , padding: 20, color: 'white'}}>
+             <div class="ml-auto mr-sm-5 float-right"  style={{ position: "fixed", zIndex: 2, right: "10px", bottom: "10px" }}>
+                <button class="btn btn-success float-end" onClick={()=>{setCheckAns(true)}}>Xem đáp án</button>
+            </div>
             {
                 questions.map((item,index)=>(
                     <div key={index} class="container mt-sm-5 my-1 bg-gray-600 p-5" style={{ borderRadius: 10 }}>
@@ -201,6 +201,7 @@ function LearingType5(props) {
                     </div>
                 ))
             }
+           
             <div class="d-flex align-items-center pt-3">
                 {
                     point>0 && 
@@ -270,6 +271,43 @@ function LearingType5(props) {
                 </div>
             </div>
             <Modal
+                isOpen={checkAns}
+                onRequestClose={closeAns}
+                style={customStyles}
+                contentLabel="Example Modal"
+            >
+                <div class="bg-blue-400" style={{
+                    height: "80px",
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "row",
+                }}>
+                    <div style={{ flex: "0.5", display: "flex", flexDirection: "column", justifyContent: "center", marginLeft: 20 }}>
+                        <p style={{ fontSize: 20, fontWeight: "bold" }}>Đáp án</p>
+                    </div>
+                    <div style={{ flex: "0.5",display: "flex", flexDirection: "row-reverse", margin: 15, overflowY: "auto" }} >
+                        <button type="button" onClick={closeAns} class="ms-auto -mx-1.5 -my-1.5 bg-white justify-center items-center flex-shrink-0 text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" data-dismiss-target="#toast-message-cta" aria-label="Close">
+                            <span class="sr-only">Close</span>
+                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div style={{ padding: "20px",maxWidth: "1000px", maxHeight: "500px", }}>
+                    {
+                        questions.map((item) => (
+                            <div>
+                                <label class="options">{item.question}
+                                </label>
+                                <label class="options">{item.ans}
+                                </label>
+                            </div>
+                        ))
+                    }
+                </div>
+            </Modal>
+            <Modal
                 isOpen={isOpen}
                 onRequestClose={closeModal}
                 style={customStyles}
@@ -284,7 +322,7 @@ function LearingType5(props) {
                     <div style={{ flex: "0.5", display: "flex", flexDirection: "column", justifyContent: "center", marginLeft: 20 }}>
                         <p style={{ fontSize: 20, fontWeight: "bold" }}>Điểm của bạn là</p>
                     </div>
-                    <div style={{ flex: "0.5",display: "flex", flexDirection: "row-reverse", margin: 15 }} >
+                    <div style={{ flex: "0.5",display: "flex", flexDirection: "row-reverse", margin: 15, overflowY: "auto", }} >
                         <button type="button" onClick={closeModal} class="ms-auto -mx-1.5 -my-1.5 bg-white justify-center items-center flex-shrink-0 text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" data-dismiss-target="#toast-message-cta" aria-label="Close">
                             <span class="sr-only">Close</span>
                             <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -293,8 +331,27 @@ function LearingType5(props) {
                         </button>
                     </div>
                 </div>
-                <div style={{ padding: "20px" }}>
+                <div style={{ padding: "20px",maxWidth: "1000px", maxHeight: "500px", }}>
                     <p style={{textAlign: 'center',fontSize: 20, fontWeight: 'bold', color: 'red'}}>{point}</p>
+                    <h1>Số câu sai</h1>
+                        {
+                            questions.map((item) => (
+                                <div>
+                                    {
+                                        (item.choiceUser!==item.ans || item.choiceUser===undefined) &&
+                                        <div style={{display: 'flex',flexDirection: 'column'}}>
+                                            <label class="options">{item.question}
+                                            </label>
+                                            <div>
+                                                <label class="options bg-green-500">Đáp án đúng: {item.ans}</label>
+                                                <label class="options bg-red-500">Đáp án của bạn: {item.choiceUser}</label>
+                                            </div>
+                                            <div style={{height: 5, width: '100%', backgroundColor: 'black', marginBottom: 20}}></div>
+                                        </div>
+                                    }
+                                </div>
+                            ))
+                        }
                 </div>
             </Modal>
         </div>
@@ -302,3 +359,5 @@ function LearingType5(props) {
 }
 
 export default LearingType5;
+
+

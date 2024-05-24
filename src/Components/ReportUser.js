@@ -1,9 +1,9 @@
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import React, { useContext, useState } from "react";
 import Modal from 'react-modal';
-import { db, storage } from "../../firebase";
+import { db, storage } from "../firebase";
 import {v4 as uuid} from 'uuid';
-import { AuthContext } from "../../context/AuthContext";
+import { AuthContext } from "../../src/context/AuthContext";
 import { doc, setDoc } from "firebase/firestore";
 const customStyles = {
     content: {
@@ -13,14 +13,18 @@ const customStyles = {
         bottom: 'auto',
         marginRight: '-50%',
         transform: 'translate(-50%, -50%)',
-        padding: '0px'
+        padding: '0px',
+        zIndex: 10
     },
 };
-function RequestBlog(props) {
+function RequestUesr(props) {
     const idReport = props.idReport;
+    const setRq=props.setRq;
+    const userName=props.nameUser;
     const [isOpen,setIsOpen]=useState(false);
     const closeModal = ()=>{
         setIsOpen(false);
+        setRq(true);
     }
     const {currentUser}= useContext(AuthContext);
     const handleSubmit = async (e)=>{
@@ -39,7 +43,7 @@ function RequestBlog(props) {
                             id: id,
                             idUserReport: currentUser.uid,
                             idReport: idReport,
-                            type: 1,
+                            type: 2,
                             content: nameReport,
                             description: description,
                             photoURL: dowloadURL,
@@ -60,11 +64,11 @@ function RequestBlog(props) {
     return ( 
         <li>
             <button 
-                onClick={()=>setIsOpen(true)}
+                onClick={()=>{setIsOpen(true); setRq(false)}}
                 type="button" 
                 class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
             >
-                Báo cáo bài viết
+                Báo cáo người dùng 
             </button>
             <Modal
                 isOpen={isOpen}
@@ -79,7 +83,7 @@ function RequestBlog(props) {
                     flexDirection: "row",
                 }}>
                     <div style={{ flex: "0.5", display: "flex", flexDirection: "column", justifyContent: "center", marginLeft: 20 }}>
-                        <p style={{ fontSize: 25, fontWeight: "bold" }}>Gửi lý do báo cáo và hình ảnh</p>
+                        <p style={{ fontSize: 25, fontWeight: "bold" }}>Báo cáo người dùng {userName}</p>
                     </div>
                     <div style={{ flex: "0.5",display: "flex", flexDirection: "row-reverse", margin: 15 }} >
                         <button type="button" onClick={closeModal} class="ms-auto -mx-1.5 -my-1.5 bg-white justify-center items-center flex-shrink-0 text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" data-dismiss-target="#toast-message-cta" aria-label="Close">
@@ -118,4 +122,4 @@ function RequestBlog(props) {
      );
 }
 
-export default RequestBlog;
+export default RequestUesr;

@@ -1,4 +1,4 @@
-import { Timestamp, arrayUnion, collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { Timestamp, arrayUnion, collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { db } from "../../firebase";
@@ -11,6 +11,7 @@ import LearingType2 from "./LearingType2";
 import LearingType3 from "./LearingType3";
 import LearingType4 from "./LearingType4";
 import LearingType5 from "./LearingType5";
+import { v4 as uuid } from "uuid";
 function Learing() {
     const { currentUser } = useContext(AuthContext);
     const { idActive, idcourse } = useParams();
@@ -94,10 +95,10 @@ function Learing() {
                     ac.push(i);
                 })
             });
+            rm.sort((a,b)=>a.timeCreate-b.timeCreate);
             rm.forEach((it) => {
                 loadSumActive(it.IdRoadMap);
             })
-
             setActiveAll(ac);
             setRoadMap(rm);
         }
@@ -147,19 +148,10 @@ function Learing() {
         const docCheck = await getDocs(q);
         //Kiểm tra xem người dùng đã có trong bảng deailActive hay chưa nếu chưa thì thêm vào còn nếu có rồi thì chuyển trạng thái bằng true
         if (docCheck.empty) {
-            let id = 1;
-            const q = query(collection(db, "detailActive"), orderBy("timeUpdate", "desc"), limit(1));
-            const querySnapshot = await getDocs(q);
-            if (!querySnapshot.empty) {
-                const lastDoc = querySnapshot.docs[0];
-                const lastId = lastDoc.data().id;
-                id = lastId + 1;
-            }
-            //id = "" + id;
-            let id1 = "" + id;
+            let id = uuid();
             try {
                 const time = Timestamp.now();
-                await setDoc(doc(db, "detailActive", id1), {
+                await setDoc(doc(db, "detailActive", id), {
                     id: id,
                     IdUser: idUser,
                     IdActive: idActive,
@@ -245,11 +237,13 @@ function Learing() {
             if (countSeek === 1) {
                 setTimeStartSeek(newTime);
             }
-            if (countSeek === 5) {
+            if (countSeek === 3) {
                 videoRef.current.pause();
                 alert("Bạn đang tua quá nhanh vui lòng coi chậm lại !");
                 videoRef.current.currentTime = timeStartSeek;
                 setCountSeek(0);
+                if(videoRef.current.pause())
+                    videoRef.current.play();
                 videoRef.current.play();
             }
         }
@@ -261,10 +255,11 @@ function Learing() {
             if (!videoRef.current.seeking) {
                 const t = newTime - currentTime;
                 // Cập nhật thời gian
-                if (t >= 60) {
+                if (t >= 30) {
                     videoRef.current.pause();
                     alert("Bạn đang tua quá nhanh vui lòng coi chậm lại !");
                     videoRef.current.currentTime = currentTime;
+                    if(videoRef.current.pause())
                     videoRef.current.play();
                 }
                 else {
@@ -297,15 +292,7 @@ function Learing() {
             timeNote = timeNote + ":" + (Math.floor(time % 60) < 10 ? "0" + Math.floor(time % 60) : "" + Math.floor(time % 60));
             //toggleDrawer();
             if (docCheck.empty) {
-                let id = 1;
-                const q = query(collection(db, "detailActive"), orderBy("id", "desc"), limit(1));
-                const querySnapshot = await getDocs(q);
-                if (!querySnapshot.empty) {
-                    const lastDoc = querySnapshot.docs[0];
-                    const lastId = lastDoc.data().id;
-                    id = parseInt(lastId) + 1;
-                }
-                id = "" + id;
+                let id = uuid();
                 try {
                     await setDoc(doc(db, "detailActive", id), {
                         id: id,

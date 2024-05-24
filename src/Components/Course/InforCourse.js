@@ -4,7 +4,7 @@ import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } fro
 import { db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import Paymentbtn from './PaymentBtn';
-
+import ChatCourse from "./ChatCourse";
 function InforCourse(props) {
     const { currentUser } = useContext(AuthContext);
     const course = props.course;
@@ -14,6 +14,37 @@ function InforCourse(props) {
     let price = "";
     price = price + course.priceCourse;
     const rating = Array.from({ length: 5 });
+    const [comment,setComment]=useState(course.comment!==undefined ? course.comment.length > 0 ? course.comment : [] : []);
+    useEffect(()=>{
+        const dt=[];
+        course.comment.map((item,index)=>{
+            const getUser = async ()=>{
+                const snap = await getDoc(doc(db,"users",item.IdUser));
+                if(snap.exists())
+                {
+                    const tmp ={
+                        content: item.content,
+                        nameUser: snap.data().displayName,
+                        avt: snap.data().photoURL,
+                        start: item.start
+                    }
+                    dt.push(tmp);
+                }
+                else{
+                    const tmp ={
+                        content: item.content,
+                        nameUser: "Ẩn danh",
+                        avt: "https://firebasestorage.googleapis.com/v0/b/testdata-1f2fb.appspot.com/o/teacher11708406978178?alt=media&token=38714eb2-a3cd-4143-8c34-dd17fcdbb965",
+                        start: item.start
+                    }
+                    dt.push(tmp);
+                }
+                console.log("Hahah");
+            }
+            return getUser();
+        })
+        setComment(dt);
+    },[course.comment])
     useEffect(() => {
         const getUser = async () => {
             const docSnap = await getDoc(doc(db, "users", currentUser.uid));
@@ -40,8 +71,16 @@ function InforCourse(props) {
             rm.forEach((it) => {
                 dt.push(it.data());
             })
-            const idActive = dt[0].id
-            navigate(`/learing/${idActive}/${course.id}`);
+            dt.sort((a,b)=> a.timeCreate-b.timeCreate);
+            if(dt.length<=0)
+            {
+                alert("Khóa học chưa có hoạt động");
+            }
+            else
+            {
+                const idActive = dt[0].id;
+                navigate(`/learing/${idActive}/${course.id}`);
+            }
         }
         else {
             
@@ -69,13 +108,18 @@ function InforCourse(props) {
             const q = query(collection(db, "active"), where("idRoadMap", "==", idRoadMap));
             const rm = await getDocs(q);
             await Promise.all(rm.docs.map(async (it) => {
-                dt.push(it.data());
-            
-                
+                dt.push(it.data());    
             }));
-            
-            const idActive = dt[0].id;
-            navigate(`/learing/${idActive}/${course.id}`);
+            dt.sort((a,b)=> a.timeCreate-b.timeCreate);
+            if(dt.length<=0)
+            {
+                alert("Khóa học chưa có hoạt động");
+            }
+            else
+            {
+                const idActive = dt[0].id;
+                navigate(`/learing/${idActive}/${course.id}`);
+            }
         }
     }
     const buttonApply = () => {
@@ -105,8 +149,13 @@ function InforCourse(props) {
                 }
             </div>
         }
-
     }
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [showOverlay, setShowOverlay] = useState(false);
+    const toggleDrawer = () => {
+        setIsDrawerOpen(!isDrawerOpen);
+        setShowOverlay(!showOverlay);
+    };
     return (
         <div class="xl:w-2/5 md:w-1/2 lg:ml-8 md:ml-6 md:mt-0 mt-6">
             <div class="border-b border-gray-200 pb-6">
@@ -141,13 +190,13 @@ function InforCourse(props) {
                     <p class="text-sm leading-none text-gray-600 dark:text-gray-300">Cơ bản</p>
                 </div>
             </div>
-            <div class="py-4 border-b border-gray-200 flex items-center justify-between">
+            <button onClick={toggleDrawer} class="py-4 border-b w-full border-gray-200 flex flex-row items-center justify-between hover:bg-slate-400">
                 <p class="text-base leading-4 text-gray-800 dark:text-gray-300">Đánh giá</p>
                 <div class="flex items-center justify-center">
                     <div class="flex items-center">
                         {
-                            rating.map((it, index) => (
-                                index + 1 <= course.rating ?
+                            rating.length >0 && rating.map((it, index) => (
+                                index + 1 <= course.rating/course.comment.length ?
                                     <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                         <path
                                             d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
@@ -164,7 +213,11 @@ function InforCourse(props) {
                         }
                     </div>
                 </div>
-            </div>
+            </button>
+            {
+                checkApply===true &&
+                <ChatCourse course={course}></ChatCourse>
+            }
             {
                 checkApply !== null && buttonApply()
             }
@@ -176,7 +229,59 @@ function InforCourse(props) {
                     </textarea>
                 </div>
             </div>
-
+            <div style={{ width: '50%', zIndex: 101 }} className={`fixed top-0 right-0 z-100 h-full transition-all duration-500 transform ${isDrawerOpen ? '' : 'translate-x-full'} bg-white shadow-lg`}>
+                <div class="bg-white" style={{
+                    height: "80px",
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "row",
+                }}></div>
+                <div class="bg-white" style={{
+                    height: "80px",
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "row",
+                }}>
+                    <div style={{ flex: "0.5", display: "flex", flexDirection: "column", justifyContent: "center", marginLeft: 20 }}>
+                        <p style={{ fontSize: 25, fontWeight: "bold", color: 'black' }}>Comment</p>
+                    </div>
+                    <div style={{ flex: "0.5", display: "flex", flexDirection: "row-reverse", margin: 15 }} >
+                        <button type="button" onClick={toggleDrawer} class="ms-auto -mx-1.5 -my-1.5 bg-white justify-center items-center flex-shrink-0 text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" data-dismiss-target="#toast-message-cta" aria-label="Close">
+                            <span class="sr-only">Close</span>
+                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <ul class="flex flex-col p-2 rounde-lg" style={{overflowY: 'auto',maxHeight: '650px', marginBottom: 20}} aria-labelledby="dropdownDefaultButton">
+                    {
+                        comment.length>0 && comment.map((item,index)=>(
+                            <li>
+                                <div>
+                                    <article class="p-6 text-base bg-white rounded-lg dark:bg-gray-900">
+                                        <footer class="flex justify-between items-center mb-2">
+                                            <div class="flex items-center">
+                                                <p class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold">
+                                                <img
+                                                    class="mr-2 w-6 h-6 rounded-full"
+                                                    src={item.avt}
+                                                    alt="Hình ảnh" />{item.nameUser}</p>
+                                                {/* <p class="text-sm text-gray-600 dark:text-gray-400">
+                                                    {timePost}
+                                                </p> */}
+                                            </div>
+                                        </footer>
+                                        <p class="text-gray-500 dark:text-gray-400">
+                                            {item.content}
+                                        </p>
+                                    </article>
+                                </div>
+                            </li>
+                        ))
+                    }
+                </ul>
+            </div>
         </div>
     );
 }

@@ -135,7 +135,7 @@ function DetailBlog() {
     return (
         blog &&
         <div>
-            <div class={`${showOverlay===false ? "flex min-h-screen flex-row bg-gray-100 text-gray-80" :  " fixed inset-0 bg-black opacity-50 z-50"}`}>
+            <div class="flex min-h-screen flex-row bg-gray-100 text-gray-80">
                 <aside class="sidebar w-60 -translate-x-full transform bg-white p-4 transition-transform duration-150 ease-in md:translate-x-0 md:shadow-md">
                     <div class="my-4 w-full border-b-4 border-indigo-100 text-center">
                         <span class="font-mono text-xl font-bold tracking-widest"> <span class="text-indigo-600">HELLO</span> DEV </span>
@@ -172,7 +172,7 @@ function DetailBlog() {
                 <main class="main -ml-48 flex flex-grow flex-col p-4 transition-all duration-150 ease-in md:ml-0">
                     <div class="flex h-full bg-white shadow-md">
                         <CKEditor
-                            class="w-full border-none rounded-none"
+                            class="w-full border-none rounded-none z-1"
                             editor={Editor}
                             config={editorConfiguration}
                             data={blog.content}
@@ -194,76 +194,76 @@ function DetailBlog() {
                     </div>
                 </main>
             </div>
-                <div style={{ width: '50%', zIndex: 101 }} className={`fixed top-0 right-0 z-100 h-full transition-all duration-500 transform ${isDrawerOpen ? '' : 'translate-x-full'} bg-white shadow-lg`}>
-                    <div class="bg-white" style={{
-                        height: "80px",
-                        width: "100%",
-                        display: "flex",
-                        flexDirection: "row",
-                    }}></div>
-                    <div class="bg-white" style={{
-                        height: "80px",
-                        width: "100%",
-                        display: "flex",
-                        flexDirection: "row",
-                    }}>
-                        <div style={{ flex: "0.5", display: "flex", flexDirection: "column", justifyContent: "center", marginLeft: 20 }}>
-                            <p style={{ fontSize: 25, fontWeight: "bold", color: 'black' }}>Comment</p>
-                        </div>
-                        <div style={{ flex: "0.5", display: "flex", flexDirection: "row-reverse", margin: 15 }} >
-                            <button type="button" onClick={toggleDrawer} class="ms-auto -mx-1.5 -my-1.5 bg-white justify-center items-center flex-shrink-0 text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" data-dismiss-target="#toast-message-cta" aria-label="Close">
-                                <span class="sr-only">Close</span>
-                                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                                </svg>
-                            </button>
-                        </div>
+            <div style={{ width: '50%', zIndex: 50 }} className={`fixed top-0 right-0 z-100 h-full transition-all duration-500 transform ${isDrawerOpen ? '' : 'translate-x-full'} bg-white shadow-lg`}>
+                <div class="bg-white" style={{
+                    height: "80px",
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "row",
+                }}></div>
+                <div class="bg-white" style={{
+                    height: "80px",
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "row",
+                }}>
+                    <div style={{ flex: "0.5", display: "flex", flexDirection: "column", justifyContent: "center", marginLeft: 20 }}>
+                        <p style={{ fontSize: 25, fontWeight: "bold", color: 'black' }}>Comment</p>
                     </div>
-                    <div class="p-4">
-                        {
-                            inserted === false ? 
-                            <input 
-                            onFocus={()=>{setInserted(true)}}
-                            typeof="text"
-                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-password" type="text" placeholder="Viết bình luận của bạn"/>
-                            :
-                            <div>
-                                <CKEditor
-                                    editor={Editor}
-                                    config={editorConfiguration1}
-                                    data={userComment}
-                                    onReady={(editor) => {
-                                        // You can store the "editor" and use when it is needed.
-                                        console.log('Editor is ready to use!', editor);
-                                    }}
-                                    onChange={(event, editor) => {
-                                        const valuData = editor.getData();
-                                        setUserComment(valuData);
-                                    }}
-                                    onBlur={(event, editor) => {
-                                        console.log('Blur.', editor);
-                                    }}
-                                    onFocus={(event, editor) => {
-                                        console.log('Focus.', editor);
-                                    }}
-                                />
-                                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                                        <button type="button" onClick={handleComment} class="mt-3 w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-500 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"> Bình luận </button>
-                                        <button type="button" onClick={()=>{setInserted(false)}} class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"> Hủy </button>
-                                    </div>
-                            </div>
-                        }
+                    <div style={{ flex: "0.5", display: "flex", flexDirection: "row-reverse", margin: 15 }} >
+                        <button type="button" onClick={toggleDrawer} class="ms-auto -mx-1.5 -my-1.5 bg-white justify-center items-center flex-shrink-0 text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" data-dismiss-target="#toast-message-cta" aria-label="Close">
+                            <span class="sr-only">Close</span>
+                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                            </svg>
+                        </button>
                     </div>
-                    <ul class="flex flex-col p-2 rounde-lg" style={{overflowY: 'auto',maxHeight: '650px', marginBottom: 20}} aria-labelledby="dropdownDefaultButton">
-                        {
-                            comment.length>0 && comment.map((item,index)=>(
-                                <li>
-                                    <ItemComment key={index} idBlog={idBlog} userComment={item}/>
-                                </li>
-                            ))
-                        }
-                    </ul>
                 </div>
+                <div class="p-4">
+                    {
+                        inserted === false ? 
+                        <input 
+                        onFocus={()=>{setInserted(true)}}
+                        typeof="text"
+                        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-password" type="text" placeholder="Viết bình luận của bạn"/>
+                        :
+                        <div>
+                            <CKEditor
+                                editor={Editor}
+                                config={editorConfiguration1}
+                                data={userComment}
+                                onReady={(editor) => {
+                                    // You can store the "editor" and use when it is needed.
+                                    console.log('Editor is ready to use!', editor);
+                                }}
+                                onChange={(event, editor) => {
+                                    const valuData = editor.getData();
+                                    setUserComment(valuData);
+                                }}
+                                onBlur={(event, editor) => {
+                                    console.log('Blur.', editor);
+                                }}
+                                onFocus={(event, editor) => {
+                                    console.log('Focus.', editor);
+                                }}
+                            />
+                                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                    <button type="button" onClick={handleComment} class="mt-3 w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-500 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"> Bình luận </button>
+                                    <button type="button" onClick={()=>{setInserted(false)}} class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"> Hủy </button>
+                                </div>
+                        </div>
+                    }
+                </div>
+                <ul class="flex flex-col p-2 rounde-lg" style={{overflowY: 'auto',maxHeight: '650px', marginBottom: 20}} aria-labelledby="dropdownDefaultButton">
+                    {
+                        comment.length>0 && comment.map((item,index)=>(
+                            <li>
+                                <ItemComment key={index} idBlog={idBlog} userComment={item} setRq={setIsDrawerOpen}/>
+                            </li>
+                        ))
+                    }
+                </ul>
+            </div>
         </div>
     );
 }

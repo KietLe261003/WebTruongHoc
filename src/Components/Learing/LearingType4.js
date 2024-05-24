@@ -2,9 +2,10 @@ import React, { useContext, useEffect, useState } from "react";
 import { Document, Page } from "react-pdf";
 import '../../Page/test.css';
 import { AuthContext } from "../../context/AuthContext";
-import { Timestamp, arrayUnion, collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { Timestamp, arrayUnion, collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
+import { v4 as uuid } from "uuid";
 export default function LearingType4(props) {
     const { currentUser } = useContext(AuthContext);
     const active = props.active;
@@ -53,19 +54,10 @@ export default function LearingType4(props) {
         const docCheck = await getDocs(q);
         //Kiểm tra xem người dùng đã có trong bảng deailActive hay chưa nếu chưa thì thêm vào còn nếu có rồi thì chuyển trạng thái bằng true
         if (docCheck.empty) {
-            let id = 1;
-            const q = query(collection(db, "detailActive"), orderBy("timeUpdate", "desc"), limit(1));
-            const querySnapshot = await getDocs(q);
-            if (!querySnapshot.empty) {
-                const lastDoc = querySnapshot.docs[0];
-                const lastId = lastDoc.data().id;
-                id = lastId + 1;
-            }
-            //id = "" + id;
-            let id1 = "" + id;
+            let id = uuid();
             try {
                 const time = Timestamp.now();
-                await setDoc(doc(db, "detailActive", id1), {
+                await setDoc(doc(db, "detailActive", id), {
                     id: id,
                     IdUser: idUser,
                     IdActive: active.id,
@@ -148,7 +140,7 @@ export default function LearingType4(props) {
                 else
                 setCheckNext(true);
 
-            },3000)
+            },10000)
         }
         else
         {

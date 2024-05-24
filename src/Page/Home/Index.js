@@ -17,11 +17,12 @@ function Home() {
             setCounter(item => item >= 2 ? 0 : item + 1);
         }, 3000);
         const getCourse = async () => {
-            const q=query(collection(db,"course"),limit(4));
+            const q=query(collection(db,"course"),where("type","==","1"),limit(4));
             
             const docCourse = await getDocs(q);
             const dt=[];
             docCourse.forEach((item)=>{
+                if(item.data().isPublic===true)
                 dt.push(item.data());
             });
             setCourese(dt);
@@ -31,9 +32,10 @@ function Home() {
             const docCourseFree= await getDocs(q);
             const dt=[];
             docCourseFree.forEach((item)=>{
+                if(item.data().isPublic===true)
                 dt.push(item.data());
             });
-            console.log(dt);
+            //console.log(dt);
             setCourseFree(dt);
         } 
         // Clear the interval when the component unmounts

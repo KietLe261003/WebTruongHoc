@@ -52,7 +52,9 @@ export default function App(props) {
             }
             else
             {
-                const idActive = dt[0].id;
+                const dt1=dt.sort((a,b)=>a.timeCreate-b.timeCreate);
+                const idActive = dt1[0].id;
+                //console.table(dt1);
                 navigate(`/learing/${idActive}/${course.id}`);
             }
         } catch (error) {

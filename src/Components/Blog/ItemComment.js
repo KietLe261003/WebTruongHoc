@@ -5,6 +5,7 @@ import Editor from 'ckeditor5-custom-build/build/ckeditor';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import { AuthContext } from "../../context/AuthContext";
 import ItemRepComment from "./ItemRepComment";
+import RequestUesr from "../ReportUser";
 const editorConfiguration1 = {
     toolbar: {
         items: [
@@ -22,6 +23,7 @@ const editorConfiguration1 = {
 function ItemComment(props) {
     const userComment = props.userComment;
     const idBlog=props.idBlog;
+    const setRq=props.setRq;
     const [user, setUser] = useState(null);
     const [content,setContent]=useState("");
     const [commentSetting,setCommentSetting]=useState(false);
@@ -154,10 +156,7 @@ function ItemComment(props) {
                                 <a href="/"
                                     class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Remove</a>
                             </li>
-                            <li>
-                                <a href="/"
-                                    class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Report</a>
-                            </li>
+                            <RequestUesr idReport={user.uid} nameUser={user.displayName} setRq={setRq}></RequestUesr>
                         </ul>
                     </div>
                     }

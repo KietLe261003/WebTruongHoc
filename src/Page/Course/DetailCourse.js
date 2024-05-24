@@ -60,9 +60,10 @@ const DetailCourse = () => {
                     ac.push(i);
                 })
             });
+            rm.sort((a,b)=>a.timeCreate-b.timeCreate);
             setActive(ac);
             if (rm.length > 0)
-                setRmFirst(rm[0].IdRoadMap);
+                setRmFirst(rm[0].IdRoadMap)
             setRoadMap(rm);
         }
         getRoadMap();
@@ -75,7 +76,7 @@ const DetailCourse = () => {
             <div class="md:flex items-start justify-between py-12 ">
                 <div class="xl:w-4/6 lg:w-2/5 w-80 md:block hidden">
                     {
-                        course && <img class="w-full" alt="" src={course.photoURL} />
+                        course && <img alt="" src={course.photoURL} />
                     }
                 </div>
                 {
@@ -156,7 +157,7 @@ const DetailCourse = () => {
                     </p>
                 </div>
                 <div style={{marginLeft: 50}}>
-                    <img style={{width: 2000, height: 600}} src='https://firebasestorage.googleapis.com/v0/b/testdata-1f2fb.appspot.com/o/CERTIFICATE?alt=media&token=c71b3605-8a99-40bb-8404-8ce74a28a139' alt='cretificate'/>
+                    <img style={{width: 2000, height: 600}} src='https://firebasestorage.googleapis.com/v0/b/testdata-1f2fb.appspot.com/o/White%20Simple%20Certificate%20of%20Appreciation%20(1).png?alt=media&token=d9f1587c-a63e-42d3-b122-50d6d0fe5367' alt='cretificate'/>
                 </div>
             </div>
             <div style={{ height: 200 }}> {err && <span>Lỗi</span>} </div>

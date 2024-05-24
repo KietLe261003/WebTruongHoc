@@ -1,8 +1,9 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import { Timestamp, arrayUnion, collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
+import { Timestamp, arrayUnion, collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
 import { db, storage } from "../../firebase";
 import { useNavigate } from "react-router-dom";
+import { v4 as uuid } from "uuid";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 function LearingType2(props) {
     const active = props.active;
@@ -59,18 +60,9 @@ function LearingType2(props) {
                         const q = query(collection(db, "detailActive"), where("IdActive", "==", active.id), where("IdUser", "==", idUser));
                         const docCheck = await getDocs(q);
                         if (docCheck.empty) {
-                            let id = 1;
-                            const q = query(collection(db, "detailActive"), orderBy("timeUpdate", "desc"), limit(1));
-                            const querySnapshot = await getDocs(q);
-                            if (!querySnapshot.empty) {
-                                const lastDoc = querySnapshot.docs[0];
-                                const lastId = lastDoc.data().id;
-                                id = parseInt(lastId) + 1;
-                            }
-                            //id = "" + id;
-                            let id1=""+id;
+                            let id = uuid();
                             try {
-                                await setDoc(doc(db, "detailActive", id1), {
+                                await setDoc(doc(db, "detailActive", id), {
                                     id: id,
                                     IdUser: idUser,
                                     IdActive: active.id,

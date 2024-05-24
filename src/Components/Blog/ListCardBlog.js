@@ -38,6 +38,7 @@ function ListCardBlog() {
                             <CardBlog key={index}
                             id={item.id}
                             hastag={item.hastag}
+                            datePost={item.datePost}
                              title={item.title} auth={item.auth} content={item.content} like={item.like} coment={item.comment.length} />
                         ))
                     }

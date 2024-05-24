@@ -162,7 +162,6 @@ export default function BlogAdmin(props) {
                                         <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                             Tác giả
                                         </th>
-                                        <th scope="col" class="px-3 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">Báo cáo</th>
                                         <th scope="col" class="px-3 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">Hastag</th>
                                         <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400 flex justify-center">Active</th>
                                     </tr>
@@ -182,11 +181,6 @@ export default function BlogAdmin(props) {
                                                 <td class="px-4 py-4 text-sm whitespace-nowrap">
                                                     <div>
                                                         <h4 class="text-gray-700 dark:text-gray-200">{item.auth}</h4>
-                                                    </div>
-                                                </td>
-                                                <td class="px-4 py-4 text-sm whitespace-nowrap">
-                                                    <div class="inline px-3 py-1 text-sm font-normal rounded-full text-emerald-500 gap-x-2 bg-emerald-100/60 dark:bg-gray-800">
-                                                        {item.report !== undefined ? item.report.length : 0}
                                                     </div>
                                                 </td>
                                                 <td class="px-4 py-4 text-sm whitespace-nowrap">

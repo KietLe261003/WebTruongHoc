@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, limit, orderBy, query, setDoc } from "firebase/firestore";
+import { Timestamp, collection, doc, getDocs, limit, orderBy, query, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import Modal from "react-modal";
 import { db } from "../../firebase";
@@ -42,12 +42,14 @@ function CreateRoadMap(props) {
                 numberRoadMap=lastId+1;
             }
             id="RM"+id;
+            const time = Timestamp.now();
             await setDoc(doc(db, "courseRoadMap", id), {
                 IdRoadMap: id,
                 nameRoadMap: nameRoadMap,
                 descriptionRoadMap: description,
                 IdCourse: IdCourse,
-                numberRoadMap: numberRoadMap
+                numberRoadMap: numberRoadMap,
+                timeCreate: time
             })
             alert("Thêm thành công");
             window.location.reload();

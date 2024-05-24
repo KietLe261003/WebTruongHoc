@@ -20,6 +20,7 @@ function DetailCourse() {
          querySnapshot.forEach((doc) => {
             rm.push(doc.data());
           });
+          rm.sort((a,b)=>a.timeCreate-b.timeCreate);
          setRoadMap(rm);
       }
       const unSub= onSnapshot(doc(db,"course",id),(doc) =>{

@@ -123,7 +123,13 @@ function CreateActiveQuiz(props) {
         else if(item.option4===item.ans)
             return true;
         else
+        {
+            console.log(item);
+            // const dt=questionWrong;
+            // dt.push(item);
+            // setQuestionWrong(dt);
             return false;
+        }
     }
     return (
         <div style={{ maxHeight: 600, padding: "20px" }}>

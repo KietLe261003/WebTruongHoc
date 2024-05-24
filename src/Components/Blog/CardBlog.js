@@ -13,6 +13,7 @@ function CardBlog(props) {
     const like = props.like;
     const coment = props.coment;
     const hastag = props.hastag;
+    const datePost=props.datePost;
     const [user, setUser] = useState(null);
     const [Content, setContent] = useState(content);
     const { currentUser } = useContext(AuthContext);
@@ -90,6 +91,11 @@ function CardBlog(props) {
         setCommentSetting(!commentSetting);
         //console.log(commentSetting);
     }
+    function formatTimestamp(timestamp) {
+        const date = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000);
+        const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+        return formattedDate;
+    }
     return (
         user &&
         <div class="px-4 bg-white mb-8 py-8 rounded-3xl mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8 ">
@@ -136,7 +142,7 @@ function CardBlog(props) {
                 <img class="h-10 w-10 flex-none rounded-full bg-gray-50" src={user.photoURL} alt="" />
                 <div class="flex-auto">
                     <div class="font-semibold">{user.displayName}</div>
-                    <span>4h trước</span>
+                    <span>{formatTimestamp(datePost)}</span>
                 </div>
                 {
                     hastag &&

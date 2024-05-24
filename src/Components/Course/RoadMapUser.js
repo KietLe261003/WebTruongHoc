@@ -56,7 +56,7 @@ function RoadMapUser(props) {
                         dt.push(doc);
                     }));
                 }
-                console.log(dt);
+                dt.sort((a,b)=>a.timeCreate-b.timeCreate);
                 setActive(dt);
             } catch (error) {
                 console.error("Lỗi khi lấy dữ liệu hoạt động:", error);
