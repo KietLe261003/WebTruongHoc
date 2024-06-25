@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/WebTruongHoc/static/css/main.14f9e32d.css",
+    "main.js": "/WebTruongHoc/static/js/main.a4abe07c.js",
+    "static/js/453.9d3cd94e.chunk.js": "/WebTruongHoc/static/js/453.9d3cd94e.chunk.js",
+    "static/media/pdf.worker.min.js": "/WebTruongHoc/static/media/pdf.worker.min.844321aeac62c1936e58.js",
+    "index.html": "/WebTruongHoc/index.html",
+    "main.14f9e32d.css.map": "/WebTruongHoc/static/css/main.14f9e32d.css.map",
+    "main.a4abe07c.js.map": "/WebTruongHoc/static/js/main.a4abe07c.js.map",
+    "453.9d3cd94e.chunk.js.map": "/WebTruongHoc/static/js/453.9d3cd94e.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.14f9e32d.css",
+    "static/js/main.a4abe07c.js"
+  ]
+}
